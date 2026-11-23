@@ -16,20 +16,19 @@ export class ItemLock extends BasePuzzleLock {
 
     async getData() {
         const data = await super.getData();
-        let config = this.document.getFlag(MODULE_ID, "config") || {};
+        const config = this.document.getFlag(MODULE_ID, "config") || {};
         data.description = config.description || "";
         const count = parseInt(config.slotCount, 10) || 3;
 
-        if (!config.state || !Array.isArray(config.state.items) || config.state.items.length !== count) {
-            config = foundry.utils.deepClone(config);
-            if (!config.state) config.state = {};
-            config.state.items = Array.from({ length: count }, () => null);
-            await this.document.setFlag(MODULE_ID, "config", config);
+        const state = this.getPuzzleState();
+        if (!Array.isArray(state.items) || state.items.length !== count) {
+            state.items = Array.from({ length: count }, () => null);
+            await this.savePuzzleState(state);
         }
 
-        data.slots = config.state.items.map((item, i) => ({
+        data.slots = state.items.map((item, i) => ({
             id: i,
-            item
+            item: item ? { ...item, img: this.normalizeAssetPath(item.img) } : null
         }));
         return data;
     }
@@ -63,41 +62,37 @@ export class ItemLock extends BasePuzzleLock {
                 }
                 if (!itemDoc) return;
 
-                const config = foundry.utils.deepClone(this.document.getFlag(MODULE_ID, "config") || {});
-                if (!config.state) config.state = {};
-                if (!Array.isArray(config.state.items)) config.state.items = [];
-                config.state.items[id] = { name: itemDoc.name, img: itemDoc.img };
+                const config = this.document.getFlag(MODULE_ID, "config") || {};
+                const state = this.getPuzzleState();
+                if (!Array.isArray(state.items)) state.items = [];
+                state.items[id] = { name: itemDoc.name, img: this.normalizeAssetPath(itemDoc.img) };
 
-                try {
-                    foundry.audio.AudioHelper.play({ src: "modules/enigma-box/sounds/TilePutDown.wav", volume: 0.7, autoplay: true }, true);
-                } catch (err) {}
+                this.playSound("modules/enigma-box/sounds/tileputdown.wav", 0.7);
 
-                await this.document.setFlag(MODULE_ID, "config", config);
+                await this.savePuzzleState(state);
                 this.render(false);
-                this._checkUnlock(config);
+                this._checkUnlock(config, state);
             });
 
             slot.addEventListener("click", async (e) => {
                 const id = parseInt(e.currentTarget.dataset.id, 10);
-                const config = foundry.utils.deepClone(this.document.getFlag(MODULE_ID, "config") || {});
-                if (config.state?.items?.[id]) {
-                    config.state.items[id] = null;
-                    try {
-                        foundry.audio.AudioHelper.play({ src: "modules/enigma-box/sounds/TilePickUp.wav", volume: 0.7, autoplay: true }, true);
-                    } catch (err) {}
-                    await this.document.setFlag(MODULE_ID, "config", config);
+                const state = this.getPuzzleState();
+                if (state.items?.[id]) {
+                    state.items[id] = null;
+                    this.playSound("modules/enigma-box/sounds/tilepickup.wav", 0.7);
+                    await this.savePuzzleState(state);
                     this.render(false);
                 }
             });
         });
     }
 
-    async _checkUnlock(config) {
+    async _checkUnlock(config, state) {
         const count = parseInt(config.slotCount, 10) || 3;
         let isSolved = true;
         for (let i = 0; i < count; i++) {
             const expected = (config[`item${i}`] || "").trim().toLowerCase();
-            const placed = (config.state.items[i]?.name || "").trim().toLowerCase();
+            const placed = (state.items?.[i]?.name || "").trim().toLowerCase();
             if (!expected || placed !== expected) {
                 isSolved = false;
                 break;
