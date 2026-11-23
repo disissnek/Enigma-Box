@@ -23,36 +23,35 @@ export class MatchPuzzle extends BasePuzzleLock {
 
     async getData() {
         const data = await super.getData();
-        let config = this.document.getFlag(MODULE_ID, "config") || {};
+        const config = this.document.getFlag(MODULE_ID, "config") || {};
         data.description = config.description || "";
-        data.frameImg = config.frameImg || "modules/enigma-box/img/frame (2).png";
-        data.stoneBg = config.stoneBg || "modules/enigma-box/img/tablic.jpg";
+        data.frameImg = this.normalizeAssetPath(config.frameImg || "") || "modules/enigma-box/img/frame (2).png";
+        data.stoneBg = this.normalizeAssetPath(config.stoneBg || "") || "modules/enigma-box/img/tablic.jpg";
 
         const cols = parseInt(config.colCount, 10) || 3;
         const rows = parseInt(config.rowCount, 10) || 2;
 
-        const validState = Array.isArray(config.state?.match)
-            && config.state.match.length === rows
-            && config.state.match.every(r => Array.isArray(r) && r.length === cols);
+        const state = this.getPuzzleState();
+        const validState = Array.isArray(state.match)
+            && state.match.length === rows
+            && state.match.every(r => Array.isArray(r) && r.length === cols);
 
         if (!validState) {
-            config = foundry.utils.deepClone(config);
-            if (!config.state) config.state = {};
-            config.state.match = Array.from({ length: rows }, () => {
+            state.match = Array.from({ length: rows }, () => {
                 const arr = [...Array(cols).keys()].sort(() => Math.random() - 0.5);
                 if (arr.every((v, idx) => v === idx) && cols > 1) {
                     [arr[0], arr[1]] = [arr[1], arr[0]];
                 }
                 return arr;
             });
-            await this.document.setFlag(MODULE_ID, "config", config);
+            await this.savePuzzleState(state);
         }
 
         data.columns = Array.from({ length: cols }, (_, c) => ({
             id: c,
-            img: config[`col${c}_img`] || "icons/svg/mystery-man.svg",
+            img: this.normalizeAssetPath(config[`col${c}_img`] || "") || "icons/svg/mystery-man.svg",
             facts: Array.from({ length: rows }, (_, r) => {
-                const ownerCol = config.state.match[r][c];
+                const ownerCol = state.match[r][c];
                 return {
                     rowId: r,
                     text: config[`col${ownerCol}_fact${r}`] || `Факт ${ownerCol + 1}-${r + 1}`
@@ -76,43 +75,36 @@ export class MatchPuzzle extends BasePuzzleLock {
                 if (!selected) {
                     selected = { col, row };
                     e.currentTarget.classList.add("selected");
-                    try {
-                        foundry.audio.AudioHelper.play({ src: "modules/enigma-box/sounds/TilePickUp.wav", volume: 0.7, autoplay: true }, true);
-                    } catch (err) {}
+                    this.playSound("modules/enigma-box/sounds/tilepickup.wav", 0.7);
                 } else if (selected.col === col && selected.row === row) {
                     selected = null;
                     e.currentTarget.classList.remove("selected");
-                    try {
-                        foundry.audio.AudioHelper.play({ src: "modules/enigma-box/sounds/TilePutDown.wav", volume: 0.7, autoplay: true }, true);
-                    } catch (err) {}
+                    this.playSound("modules/enigma-box/sounds/tileputdown.wav", 0.7);
                 } else if (selected.row === row) {
-                    const config = foundry.utils.deepClone(this.document.getFlag(MODULE_ID, "config") || {});
-                    const temp = config.state.match[row][selected.col];
-                    config.state.match[row][selected.col] = config.state.match[row][col];
-                    config.state.match[row][col] = temp;
+                    const config = this.document.getFlag(MODULE_ID, "config") || {};
+                    const state = this.getPuzzleState();
+                    const temp = state.match[row][selected.col];
+                    state.match[row][selected.col] = state.match[row][col];
+                    state.match[row][col] = temp;
 
-                    try {
-                        foundry.audio.AudioHelper.play({ src: "modules/enigma-box/sounds/TilePutDown.wav", volume: 0.7, autoplay: true }, true);
-                    } catch (err) {}
+                    this.playSound("modules/enigma-box/sounds/tileputdown.wav", 0.7);
 
                     selected = null;
-                    await this.document.setFlag(MODULE_ID, "config", config);
+                    await this.savePuzzleState(state);
                     this.render(false);
-                    this._checkUnlock(config);
+                    this._checkUnlock(config, state);
                 } else {
                     container.querySelectorAll(".match-slot.clickable").forEach(s => s.classList.remove("selected"));
                     selected = { col, row };
                     e.currentTarget.classList.add("selected");
-                    try {
-                        foundry.audio.AudioHelper.play({ src: "modules/enigma-box/sounds/TilePickUp.wav", volume: 0.7, autoplay: true }, true);
-                    } catch (err) {}
+                    this.playSound("modules/enigma-box/sounds/tilepickup.wav", 0.7);
                 }
             });
         });
     }
 
-    async _checkUnlock(config) {
-        const isSolved = config.state.match.every(rowArr => rowArr.every((ownerCol, colIdx) => ownerCol === colIdx));
+    async _checkUnlock(config, state) {
+        const isSolved = state.match.every(rowArr => rowArr.every((ownerCol, colIdx) => ownerCol === colIdx));
         if (isSolved) await this.onUnlock();
     }
 }
