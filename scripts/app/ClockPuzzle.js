@@ -5,15 +5,15 @@ export class ClockPuzzle extends BasePuzzleLock {
     static get APP_ID() { return "clock-puzzle"; }
 
     get unlockSound() {
-        return "modules/enigma-box/sounds/Lock_Small02.wav";
+        return "modules/enigma-box/sounds/lock_small02.wav";
     }
 
     static get formConfiguration() {
         return {
             inputs: [
                 { name: "clockFace", label: "Циферблат", type: "filepicker", value: "modules/enigma-box/img/clock.svg" },
-                { name: "handHour", label: "Часовая (Короткая)", type: "filepicker", value: "modules/enigma-box/img/Arrow1.svg" },
-                { name: "handMinute", label: "Минутная (Длинная)", type: "filepicker", value: "modules/enigma-box/img/Arrow2.svg" },
+                { name: "handHour", label: "Часовая (Короткая)", type: "filepicker", value: "modules/enigma-box/img/arrow1.svg" },
+                { name: "handMinute", label: "Минутная (Длинная)", type: "filepicker", value: "modules/enigma-box/img/arrow2.svg" },
                 { name: "solHour", label: "Решение: Часы (1-12)", type: "number", value: 12, min: 1, max: 12 },
                 { name: "solMinute", label: "Решение: Минуты (1-12)", type: "number", value: 12, min: 1, max: 12 }
             ]
@@ -22,22 +22,21 @@ export class ClockPuzzle extends BasePuzzleLock {
 
     async getData() {
         const data = await super.getData();
-        let config = this.document.getFlag(MODULE_ID, "config") || {};
+        const config = this.document.getFlag(MODULE_ID, "config") || {};
         data.description = config.description || "";
 
-        if (!config.state || !config.state.clock || typeof config.state.clock.hourClicks !== "number") {
-            config = foundry.utils.deepClone(config);
-            if (!config.state) config.state = {};
-            config.state.clock = { hourClicks: 0, minuteClicks: 0 };
-            await this.document.setFlag(MODULE_ID, "config", config);
+        const state = this.getPuzzleState();
+        if (!state.clock || typeof state.clock.hourClicks !== "number") {
+            state.clock = { hourClicks: 0, minuteClicks: 0 };
+            await this.savePuzzleState(state);
         }
 
-        data.clockFace = config.clockFace;
-        data.handHour = config.handHour;
-        data.handMinute = config.handMinute;
+        data.clockFace = this.normalizeAssetPath(config.clockFace || "") || "modules/enigma-box/img/clock.svg";
+        data.handHour = this.normalizeAssetPath(config.handHour || "") || "modules/enigma-box/img/arrow1.svg";
+        data.handMinute = this.normalizeAssetPath(config.handMinute || "") || "modules/enigma-box/img/arrow2.svg";
 
-        data.degHour = config.state.clock.hourClicks * 30;
-        data.degMinute = config.state.clock.minuteClicks * 30;
+        data.degHour = state.clock.hourClicks * 30;
+        data.degMinute = state.clock.minuteClicks * 30;
 
         return data;
     }
@@ -50,25 +49,25 @@ export class ClockPuzzle extends BasePuzzleLock {
         container.querySelectorAll(".enigma-hand").forEach(hand => {
             hand.addEventListener("click", async (e) => {
                 const type = e.currentTarget.dataset.type;
-                const config = foundry.utils.deepClone(this.document.getFlag(MODULE_ID, "config") || {});
+                const config = this.document.getFlag(MODULE_ID, "config") || {};
+                const state = this.getPuzzleState();
+                if (!state.clock) state.clock = { hourClicks: 0, minuteClicks: 0 };
 
-                config.state.clock[type] += 1;
-                e.currentTarget.style.transform = `translateX(-50%) rotate(${config.state.clock[type] * 30}deg)`;
+                state.clock[type] = (state.clock[type] || 0) + 1;
+                e.currentTarget.style.transform = `translateX(-50%) rotate(${state.clock[type] * 30}deg)`;
 
-                try {
-                    foundry.audio.AudioHelper.play({ src: "modules/enigma-box/sounds/Metal_Move01.wav", volume: 0.7, autoplay: true }, true);
-                } catch (err) {}
+                this.playSound("modules/enigma-box/sounds/metal_move01.wav", 0.7);
 
-                await this.document.setFlag(MODULE_ID, "config", config);
-                this._checkUnlock(config);
+                await this.savePuzzleState(state);
+                this._checkUnlock(config, state);
             });
         });
     }
 
-    async _checkUnlock(config) {
-        let h = config.state.clock.hourClicks % 12;
+    async _checkUnlock(config, state) {
+        let h = (state.clock?.hourClicks || 0) % 12;
         if (h === 0) h = 12;
-        let m = config.state.clock.minuteClicks % 12;
+        let m = (state.clock?.minuteClicks || 0) % 12;
         if (m === 0) m = 12;
 
         if (h === (parseInt(config.solHour, 10) || 12) && m === (parseInt(config.solMinute, 10) || 12)) {
