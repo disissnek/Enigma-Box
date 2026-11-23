@@ -18,23 +18,22 @@ export class ImageWheel extends BasePuzzleLock {
 
     async getData() {
         const data = await super.getData();
-        let config = this.document.getFlag(MODULE_ID, "config") || {};
+        const config = this.document.getFlag(MODULE_ID, "config") || {};
         data.description = config.description || "";
 
-        if (!config.state || !Array.isArray(config.state.wheel)) {
-            config = foundry.utils.deepClone(config);
-            if (!config.state) config.state = {};
-            config.state.wheel = [0, 0, 0];
-            await this.document.setFlag(MODULE_ID, "config", config);
+        const state = this.getPuzzleState();
+        if (!Array.isArray(state.wheel)) {
+            state.wheel = [0, 0, 0];
+            await this.savePuzzleState(state);
         }
 
-        data.bgImg = config.bgImg || "";
-        data.wheelImg = config.wheelImg || "";
+        data.bgImg = this.normalizeAssetPath(config.bgImg || "");
+        data.wheelImg = this.normalizeAssetPath(config.wheelImg || "");
 
         data.rings = [
-            { id: 0, class: "outer", rot: config.state.wheel[0] * 30, z: 10 },
-            { id: 1, class: "mid", rot: config.state.wheel[1] * 30, z: 11 },
-            { id: 2, class: "inner", rot: config.state.wheel[2] * 30, z: 12 }
+            { id: 0, class: "outer", rot: state.wheel[0] * 30, z: 10 },
+            { id: 1, class: "mid", rot: state.wheel[1] * 30, z: 11 },
+            { id: 2, class: "inner", rot: state.wheel[2] * 30, z: 12 }
         ];
         return data;
     }
@@ -57,29 +56,29 @@ export class ImageWheel extends BasePuzzleLock {
             else if (dist <= radius) ringId = 0;
 
             if (ringId !== -1) {
-                const config = foundry.utils.deepClone(this.document.getFlag(MODULE_ID, "config") || {});
-                config.state.wheel[ringId] += 1;
+                const config = this.document.getFlag(MODULE_ID, "config") || {};
+                const state = this.getPuzzleState();
+                if (!Array.isArray(state.wheel)) state.wheel = [0, 0, 0];
+                state.wheel[ringId] += 1;
 
                 const ringEl = container.querySelector(`.enigma-ring[data-id="${ringId}"]`);
-                if (ringEl) ringEl.style.transform = `rotate(${config.state.wheel[ringId] * 30}deg)`;
+                if (ringEl) ringEl.style.transform = `rotate(${state.wheel[ringId] * 30}deg)`;
 
-                try {
-                    foundry.audio.AudioHelper.play({ src: "modules/enigma-box/sounds/statuedvizh.mp3", volume: 0.7, autoplay: true }, true);
-                } catch (err) {}
+                this.playSound("modules/enigma-box/sounds/statuedvizh.mp3", 0.7);
 
-                await this.document.setFlag(MODULE_ID, "config", config);
-                this._checkUnlock(config);
+                await this.savePuzzleState(state);
+                this._checkUnlock(config, state);
             }
         });
     }
 
-    async _checkUnlock(config) {
+    async _checkUnlock(config, state) {
         const s1 = (parseInt(config.sol1, 10) || 0) % 12;
         const s2 = (parseInt(config.sol2, 10) || 0) % 12;
         const s3 = (parseInt(config.sol3, 10) || 0) % 12;
-        if ((config.state.wheel[0] % 12) === s1 &&
-            (config.state.wheel[1] % 12) === s2 &&
-            (config.state.wheel[2] % 12) === s3) {
+        if ((state.wheel[0] % 12) === s1 &&
+            (state.wheel[1] % 12) === s2 &&
+            (state.wheel[2] % 12) === s3) {
             await this.onUnlock();
         }
     }
