@@ -1,0 +1,64 @@
+<form autocomplete="off">
+    <div class="form-group">
+        <label>Включить загадку?</label>
+        <input type="checkbox" name="isActive" {{checked config.isActive}}>
+    </div>
+
+    <div class="form-group">
+        <label>Тип загадки:</label>
+        <select name="type">
+            <option value="item-lock" {{#if (eq config.type "item-lock")}}selected{{/if}}>Слоты для предметов</option>
+            <option value="image-wheel" {{#if (eq config.type "image-wheel")}}selected{{/if}}>Вращение колец (Фреска)</option>
+            <option value="statue-rotator" {{#if (eq config.type "statue-rotator")}}selected{{/if}}>Вращение статуй</option>
+            <option value="clock-puzzle" {{#if (eq config.type "clock-puzzle")}}selected{{/if}}>Старинные Часы</option>
+            <option value="lever-puzzle" {{#if (eq config.type "lever-puzzle")}}selected{{/if}}>Панель с Рычагами</option>
+            <option value="match-puzzle" {{#if (eq config.type "match-puzzle")}}selected{{/if}}>Сопоставление фактов</option>
+            <option value="music-puzzle" {{#if (eq config.type "music-puzzle")}}selected{{/if}}>Музыкальная секвенция</option>
+            <option value="cryptex-puzzle" {{#if (eq config.type "cryptex-puzzle")}}selected{{/if}}>Кодовый Криптекс (Вертикальный)</option>
+            <option value="timeline-puzzle" {{#if (eq config.type "timeline-puzzle")}}selected{{/if}}>Таймлайн (Книги)</option>
+            <option value="password-puzzle" {{#if (eq config.type "password-puzzle")}}selected{{/if}}>Кодовая панель (Циферблат)</option>
+            <option value="text-password" {{#if (eq config.type "text-password")}}selected{{/if}}>Пароль (Ввод с клавиатуры)</option>
+            <option value="mirror-puzzle" {{#if (eq config.type "mirror-puzzle")}}selected{{/if}}>Световые Зеркала</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Заголовок окна:</label>
+        <input type="text" name="customTitle" value="{{config.customTitle}}" placeholder="Например: Дверь в гробницу...">
+    </div>
+
+    <div class="form-group stacked">
+        <label>Художественное описание (контекст):</label>
+        <textarea name="description" rows="3" placeholder="Перед вами загадка...">{{config.description}}</textarea>
+    </div>
+
+    <div class="form-group">
+        <label>ID целевого тайла (MATT):</label>
+        <input type="text" name="successTileId" value="{{config.successTileId}}" placeholder="Например: xyz123ABC...">
+    </div>
+
+    <hr>
+    <h3>Настройки пазла</h3>
+
+    {{#each inputs as |input|}}
+        <div class="form-group">
+            <label>{{input.label}}</label>
+            {{#if (eq input.type 'text')}}<input type="text" name="{{input.name}}" value="{{input.value}}">{{/if}}
+            {{#if (eq input.type 'number')}}<input type="number" name="{{input.name}}" value="{{input.value}}" min="{{input.min}}" max="{{input.max}}">{{/if}}
+            {{#if (eq input.type 'filepicker')}}
+                <div class="form-fields">
+                    {{filePicker target=input.name type="imagevideo"}}
+                    <input class="image" type="text" name="{{input.name}}" value="{{input.value}}">
+                </div>
+            {{/if}}
+            {{#if (eq input.type 'audiopicker')}}
+                <div class="form-fields">
+                    {{filePicker target=input.name type="audio"}}
+                    <input class="audio" type="text" name="{{input.name}}" value="{{input.value}}">
+                </div>
+            {{/if}}
+        </div>
+    {{/each}}
+
+    <button type="submit" style="margin-top: 15px;"><i class="fas fa-save"></i> Сохранить</button>
+</form>

@@ -1,0 +1,10 @@
+<div class="puzzle-inner-content">
+    <h1>{{docName}}</h1>
+    {{#if description}}<p class="enigma-desc">{{{description}}}</p>{{/if}}
+
+    <div class="enigma-statue-container">
+        {{#each statues as |statue|}}
+            <div class="enigma-statue" data-id="{{statue.id}}" style="background-image: url('{{{statue.img}}}');"></div>
+        {{/each}}
+    </div>
+</div>

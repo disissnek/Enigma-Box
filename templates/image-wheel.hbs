@@ -1,0 +1,12 @@
+<div class="puzzle-inner-content">
+    <h1>{{docName}}</h1>
+    {{#if description}}<p class="enigma-desc">{{{description}}}</p>{{/if}}
+    
+    <div class="enigma-wheel-container" style="background-image: url('{{{bgImg}}}');">
+        {{#each rings as |ring|}}
+            <div class="enigma-ring {{ring.class}}" data-id="{{ring.id}}" 
+                 style="background-image: url('{{{../wheelImg}}}'); z-index: {{ring.z}}; transform: rotate({{ring.rot}}deg);">
+            </div>
+        {{/each}}
+    </div>
+</div>

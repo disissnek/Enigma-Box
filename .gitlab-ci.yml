@@ -1,0 +1,45 @@
+image: node:24
+
+stages:
+  - check
+  - package
+  - release
+
+check:
+  stage: check
+  script:
+    - npm ci --ignore-scripts
+    - npm run check
+    - python3 -m unittest discover -s tests
+
+package:
+  stage: package
+  rules:
+    - if: '$CI_COMMIT_TAG'
+  script:
+    - node tooling/check-release.js "$CI_COMMIT_TAG"
+    - npm run package
+    - 'curl --fail --show-error --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file dist/enigma-box.zip "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/enigma-box/$CI_COMMIT_TAG/enigma-box.zip"'
+    - 'curl --fail --show-error --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file dist/module.json "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/enigma-box/$CI_COMMIT_TAG/module.json"'
+
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/cli:latest
+  rules:
+    - if: '$CI_COMMIT_TAG'
+  script:
+    - echo "Creating release $CI_COMMIT_TAG"
+  release:
+    name: 'Enigma Box $CI_COMMIT_TAG'
+    tag_name: '$CI_COMMIT_TAG'
+    description: 'Enigma Box $CI_COMMIT_TAG'
+    assets:
+      links:
+        - name: 'enigma-box.zip'
+          url: '$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/enigma-box/$CI_COMMIT_TAG/enigma-box.zip'
+          filepath: '/enigma-box.zip'
+          link_type: package
+        - name: 'module.json'
+          url: '$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/enigma-box/$CI_COMMIT_TAG/module.json'
+          filepath: '/module.json'
+          link_type: package

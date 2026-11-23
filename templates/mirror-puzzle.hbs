@@ -1,0 +1,28 @@
+<div class="puzzle-inner-content">
+    <h1>{{docName}}</h1>
+    {{#if description}}<p class="enigma-desc">{{{description}}}</p>{{/if}}
+
+    <div class="enigma-mirror-board" style="background-image: url('{{{mirrorFieldBg}}}');">
+        <div class="mirror-beams-layer">
+            {{#each beams as |beam|}}
+                <div class="mirror-beam" style="top: {{beam.top}}%; left: {{beam.left}}%; background-image: url('{{{../lightImg}}}'); transform: translate(-50%, -50%) rotate({{beam.deg}}deg);"></div>
+            {{/each}}
+        </div>
+
+        <div class="mirror-grid">
+            {{#each cells as |cell|}}
+                <div class="mirror-cell">
+                    {{#if cell.isStart}}
+                        <div class="mirror-emitter" style="background-image: url('{{{../startImg}}}');"></div>
+                    {{/if}}
+                    {{#if cell.isEnd}}
+                        <div class="mirror-receiver {{#if ../isSolved}}charged{{/if}}" style="background-image: url('{{{../endImg}}}');"></div>
+                    {{/if}}
+                    {{#if cell.hasMirror}}
+                        <div class="mirror-piece" data-key="{{cell.key}}" style="background-image: url('{{{../mirrorImg}}}'); transform: rotate({{cell.rot}}deg);"></div>
+                    {{/if}}
+                </div>
+            {{/each}}
+        </div>
+    </div>
+</div>

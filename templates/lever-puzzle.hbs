@@ -1,0 +1,20 @@
+<div class="puzzle-inner-content">
+    <h1>{{docName}}</h1>
+    {{#if description}}<p class="enigma-desc">{{{description}}}</p>{{/if}}
+
+    <div class="enigma-lever-board">
+        {{#each levers as |lever|}}
+            <div class="enigma-lever-slot">
+                <div class="lever-track"></div>
+                <div class="lever-ticks">
+                    {{#each ../ticks as |tick|}}
+                        <div class="lever-tick" style="top: {{tick.top}}%;"></div>
+                    {{/each}}
+                </div>
+                <div class="lever-click-area" data-id="{{lever.id}}">
+                    <div class="lever-handle" style="top: {{lever.top}}%; background-image: url('{{{../handleImg}}}');"></div>
+                </div>
+            </div>
+        {{/each}}
+    </div>
+</div>

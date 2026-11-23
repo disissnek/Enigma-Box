@@ -1,0 +1,20 @@
+<div class="puzzle-inner-content">
+    <h1>{{docName}}</h1>
+    {{#if description}}<p class="enigma-desc">{{{description}}}</p>{{/if}}
+    
+    <div class="enigma-match-board vertical-match">
+        {{#each columns as |col|}}
+            <div class="match-column">
+                <div class="portrait-container">
+                    <div class="portrait-img" style="background-image: url('{{{col.img}}}');"></div>
+                    <div class="portrait-frame" style="background-image: url('{{{../frameImg}}}');"></div>
+                </div>
+                {{#each col.facts as |fact|}}
+                    <div class="match-slot clickable has-bg" data-col="{{col.id}}" data-row="{{fact.rowId}}" style="background-image: url('{{{../../stoneBg}}}');">
+                        <span>{{fact.text}}</span>
+                    </div>
+                {{/each}}
+            </div>
+        {{/each}}
+    </div>
+</div>

@@ -1,0 +1,25 @@
+{
+  "id": "enigma-box",
+  "title": "Enigma Box",
+  "version": "1.0.0",
+  "url": "https://gitlab.com/arthuria-systems/enigma-box",
+  "manifest": "https://gitlab.com/arthuria-systems/enigma-box/-/releases/permalink/latest/downloads/module.json",
+  "download": "https://gitlab.com/arthuria-systems/enigma-box/-/releases/latest/downloads/enigma-box.zip",
+  "compatibility": {
+    "minimum": "12",
+    "verified": "14"
+  },
+  "relationships": {
+    "requires": [
+      {
+        "id": "lib-wrapper",
+        "type": "module"
+      }
+    ]
+  },
+  "esmodules": ["scripts/main.js"
+  ],
+  "styles": [
+    "styles/style.css"
+  ]
+}
