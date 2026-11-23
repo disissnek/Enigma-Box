@@ -32,10 +32,10 @@ export class MirrorPuzzle extends BasePuzzleLock {
             .filter(Boolean);
     }
 
-    _traceBeam(config) {
+    _traceBeam(config, state) {
         const startR = Math.min(4, Math.max(0, (parseInt(config.startRow, 10) || 3) - 1));
         const endR = Math.min(4, Math.max(0, (parseInt(config.endRow, 10) || 3) - 1));
-        const mirrorMap = config.state?.mirrors || {};
+        const mirrorMap = state?.mirrors || {};
 
         const dr = [-1, 0, 1, 0];
         const dc = [0, 1, 0, -1];
@@ -88,35 +88,34 @@ export class MirrorPuzzle extends BasePuzzleLock {
 
     async getData() {
         const data = await super.getData();
-        let config = this.document.getFlag(MODULE_ID, "config") || {};
+        const config = this.document.getFlag(MODULE_ID, "config") || {};
         data.description = config.description || "";
 
-        data.mirrorFieldBg = config.mirrorFieldBg || "modules/enigma-box/img/backmirrors.png";
-        data.startImg = config.startImg || "modules/enigma-box/img/mirrorstart.png";
-        data.endImg = config.endImg || "modules/enigma-box/img/mirrorend.png";
-        data.mirrorImg = config.mirrorImg || "modules/enigma-box/img/mirror.png";
-        data.lightImg = config.lightImg || "modules/enigma-box/img/mirrorlight.png";
+        data.mirrorFieldBg = this.normalizeAssetPath(config.mirrorFieldBg || "") || "modules/enigma-box/img/backmirrors.png";
+        data.startImg = this.normalizeAssetPath(config.startImg || "") || "modules/enigma-box/img/mirrorstart.png";
+        data.endImg = this.normalizeAssetPath(config.endImg || "") || "modules/enigma-box/img/mirrorend.png";
+        data.mirrorImg = this.normalizeAssetPath(config.mirrorImg || "") || "modules/enigma-box/img/mirror.png";
+        data.lightImg = this.normalizeAssetPath(config.lightImg || "") || "modules/enigma-box/img/mirrorlight.png";
 
         const startR = Math.min(4, Math.max(0, (parseInt(config.startRow, 10) || 3) - 1));
         const endR = Math.min(4, Math.max(0, (parseInt(config.endRow, 10) || 3) - 1));
         const coords = this._parseMirrorCoords(config.mirrors);
 
-        const existingKeys = Object.keys(config.state?.mirrors || {});
-        const needInit = !config.state || !config.state.mirrors ||
+        const state = this.getPuzzleState();
+        const existingKeys = Object.keys(state.mirrors || {});
+        const needInit = !state.mirrors ||
             existingKeys.length !== coords.length ||
             !coords.every(k => existingKeys.includes(k));
 
         if (needInit) {
-            config = foundry.utils.deepClone(config);
-            if (!config.state) config.state = {};
-            config.state.mirrors = {};
+            state.mirrors = {};
             coords.forEach((key, idx) => {
-                config.state.mirrors[key] = (idx % 2) * 2;
+                state.mirrors[key] = (idx % 2) * 2;
             });
-            await this.document.setFlag(MODULE_ID, "config", config);
+            await this.savePuzzleState(state);
         }
 
-        const { beams, solved } = this._traceBeam(config);
+        const { beams, solved } = this._traceBeam(config, state);
         data.beams = beams;
         data.isSolved = solved;
 
@@ -126,8 +125,8 @@ export class MirrorPuzzle extends BasePuzzleLock {
                 const key = `${r}-${c}`;
                 const isStart = (r === startR && c === 0);
                 const isEnd = (r === endR && c === 4);
-                const hasMirror = !isStart && !isEnd && (config.state.mirrors[key] !== undefined);
-                const clicks = hasMirror ? config.state.mirrors[key] : 0;
+                const hasMirror = !isStart && !isEnd && (state.mirrors[key] !== undefined);
+                const clicks = hasMirror ? state.mirrors[key] : 0;
 
                 cells.push({
                     key,
@@ -150,17 +149,16 @@ export class MirrorPuzzle extends BasePuzzleLock {
         container.querySelectorAll(".mirror-piece").forEach(mirrorEl => {
             mirrorEl.addEventListener("click", async (e) => {
                 const key = e.currentTarget.dataset.key;
-                const config = foundry.utils.deepClone(this.document.getFlag(MODULE_ID, "config") || {});
-                if (!config.state?.mirrors || config.state.mirrors[key] === undefined) return;
+                const config = this.document.getFlag(MODULE_ID, "config") || {};
+                const state = this.getPuzzleState();
+                if (!state.mirrors || state.mirrors[key] === undefined) return;
 
-                config.state.mirrors[key] += 1;
+                state.mirrors[key] += 1;
 
-                try {
-                    foundry.audio.AudioHelper.play({ src: "modules/enigma-box/sounds/StoneSlide02.wav", volume: 0.7, autoplay: true }, true);
-                } catch (err) {}
+                this.playSound("modules/enigma-box/sounds/stoneslide02.wav", 0.7);
 
-                await this.document.setFlag(MODULE_ID, "config", config);
-                const { solved } = this._traceBeam(config);
+                await this.savePuzzleState(state);
+                const { solved } = this._traceBeam(config, state);
                 this.render(false);
 
                 if (solved) {
