@@ -62,8 +62,8 @@
    4. ЧАСЫ
 ========================================== */
 .enigma-clock-container {
-    --clock-cx: 48.2%;
-    --clock-cy: 52.2%;
+    --clock-cx: 49.9%;
+    --clock-cy: 50.5%;
     position: relative; width: 300px; height: 300px; margin: 0 auto 30px auto;
     background-size: contain; background-position: center; background-repeat: no-repeat;
     border-radius: 50%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
