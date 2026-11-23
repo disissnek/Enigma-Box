@@ -15,6 +15,15 @@ const PUZZLE_REGISTRY = {
     "mirror-puzzle": { file: "MirrorPuzzle.js", className: "MirrorPuzzle" }
 };
 
+function normalizeModulePath(val) {
+    if (typeof val !== "string") return val;
+    const trimmed = val.trim();
+    if (/^modules\/enigma-box\/(img|sounds)\//i.test(trimmed)) {
+        return trimmed.toLowerCase();
+    }
+    return val;
+}
+
 export class EnigmaConfig extends FormApplication {
     constructor(document) {
         super();
@@ -57,10 +66,13 @@ export class EnigmaConfig extends FormApplication {
             }
         }
 
-        inputs = inputs.map(i => ({
-            ...i,
-            value: config[i.name] !== undefined ? config[i.name] : i.value
-        }));
+        inputs = inputs.map(i => {
+            const rawVal = config[i.name] !== undefined ? config[i.name] : i.value;
+            return {
+                ...i,
+                value: normalizeModulePath(rawVal)
+            };
+        });
 
         return { config, inputs };
     }
@@ -79,7 +91,7 @@ export class EnigmaConfig extends FormApplication {
     async _updateObject(event, formData) {
         const config = this.document.getFlag(MODULE_ID, "config") || {};
         for (let [k, v] of Object.entries(formData)) {
-            config[k] = v;
+            config[k] = normalizeModulePath(v);
         }
         await this.document.setFlag(MODULE_ID, "config", config);
         ui.notifications.success("Настройки Enigma Box сохранены!");
