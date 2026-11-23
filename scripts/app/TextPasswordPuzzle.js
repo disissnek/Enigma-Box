@@ -19,7 +19,7 @@ export class TextPasswordPuzzle extends BasePuzzleLock {
         const data = await super.getData();
         const config = this.document.getFlag(MODULE_ID, "config") || {};
         data.description = config.description || "";
-        data.panelBg = config.panelBg || "modules/enigma-box/img/panel.jpg";
+        data.panelBg = this.normalizeAssetPath(config.panelBg || "") || "modules/enigma-box/img/panel.jpg";
         data.passPlaceholder = config.passPlaceholder !== undefined ? config.passPlaceholder : "Введите пароль...";
         return data;
     }
@@ -63,18 +63,12 @@ export class TextPasswordPuzzle extends BasePuzzleLock {
         inputEl.addEventListener("keydown", (e) => {
             if (e.key === "Enter") {
                 e.preventDefault();
-                try {
-                    foundry.audio.AudioHelper.play({ src: "modules/enigma-box/sounds/TypeBell.ogg", volume: 0.7, autoplay: true }, true);
-                } catch (err) {}
+                this.playSound("modules/enigma-box/sounds/typebell.ogg", 0.7);
                 verifyPassword();
             } else if (e.key === "Backspace" || e.key === "Delete") {
-                try {
-                    foundry.audio.AudioHelper.play({ src: "modules/enigma-box/sounds/ComputerGameBeep01.wav", volume: 0.6, autoplay: true }, true);
-                } catch (err) {}
+                this.playSound("modules/enigma-box/sounds/computergamebeep01.wav", 0.6);
             } else if (e.key.length === 1) {
-                try {
-                    foundry.audio.AudioHelper.play({ src: "modules/enigma-box/sounds/TypeLetter.wav", volume: 0.6, autoplay: true }, true);
-                } catch (err) {}
+                this.playSound("modules/enigma-box/sounds/typeletter.wav", 0.6);
             }
         });
 
@@ -82,18 +76,14 @@ export class TextPasswordPuzzle extends BasePuzzleLock {
             clearBtn.addEventListener("click", () => {
                 inputEl.value = "";
                 inputEl.classList.remove("error");
-                try {
-                    foundry.audio.AudioHelper.play({ src: "modules/enigma-box/sounds/ComputerGameBeep01.wav", volume: 0.7, autoplay: true }, true);
-                } catch (err) {}
+                this.playSound("modules/enigma-box/sounds/computergamebeep01.wav", 0.7);
                 inputEl.focus();
             });
         }
 
         if (submitBtn) {
             submitBtn.addEventListener("click", () => {
-                try {
-                    foundry.audio.AudioHelper.play({ src: "modules/enigma-box/sounds/TypeBell.ogg", volume: 0.7, autoplay: true }, true);
-                } catch (err) {}
+                this.playSound("modules/enigma-box/sounds/typebell.ogg", 0.7);
                 verifyPassword();
             });
         }
