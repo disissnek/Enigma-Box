@@ -5,7 +5,7 @@ export class CryptexPuzzle extends BasePuzzleLock {
     static get APP_ID() { return "cryptex-puzzle"; }
 
     get unlockSound() {
-        return "modules/enigma-box/sounds/Lock_Small02.wav";
+        return "modules/enigma-box/sounds/lock_small02.wav";
     }
 
     static get formConfiguration() {
@@ -25,26 +25,26 @@ export class CryptexPuzzle extends BasePuzzleLock {
 
     async getData() {
         const data = await super.getData();
-        let config = this.document.getFlag(MODULE_ID, "config") || {};
+        const config = this.document.getFlag(MODULE_ID, "config") || {};
         data.description = config.description || "";
-        data.bracketImg = config.bracketImg || "modules/enigma-box/img/kraicill.png";
-        data.bgImg = config.bgImg || "modules/enigma-box/img/cilindrifon.png";
+        data.bracketImg = this.normalizeAssetPath(config.bracketImg || "") || "modules/enigma-box/img/kraicill.png";
+        data.bgImg = this.normalizeAssetPath(config.bgImg || "") || "modules/enigma-box/img/cilindrifon.png";
 
         const count = parseInt(config.symCount, 10) || 4;
 
-        if (!config.state || !Array.isArray(config.state.cryptex) || config.state.cryptex.length !== count) {
-            config = foundry.utils.deepClone(config);
-            if (!config.state) config.state = {};
-            config.state.cryptex = Array.from({ length: count }, () => 0);
-            await this.document.setFlag(MODULE_ID, "config", config);
+        const state = this.getPuzzleState();
+        if (!Array.isArray(state.cryptex) || state.cryptex.length !== count) {
+            state.cryptex = Array.from({ length: count }, () => 0);
+            await this.savePuzzleState(state);
         }
 
-        data.cylinders = config.state.cryptex.map((val, i) => {
+        data.cylinders = state.cryptex.map((val, i) => {
             const vals = (config[`cyl${i}_vals`] || "А,Б,В,Г,Д").split(",").map(s => s.trim());
             const safeVal = Number.isInteger(val) ? val : 0;
-            const currentVal = vals[safeVal % vals.length];
-            const isImg = currentVal.includes("/") || currentVal.includes(".");
-            return { id: i, symbol: currentVal, isImg };
+            const rawSymbol = vals[safeVal % vals.length];
+            const isImg = rawSymbol.includes("/") || rawSymbol.includes(".");
+            const symbol = isImg ? this.normalizeAssetPath(rawSymbol) : rawSymbol;
+            return { id: i, symbol, isImg };
         });
 
         return data;
@@ -57,16 +57,17 @@ export class CryptexPuzzle extends BasePuzzleLock {
         container.querySelectorAll(".cryptex-cyl").forEach(cyl => {
             cyl.addEventListener("click", async (e) => {
                 const id = parseInt(e.currentTarget.dataset.id, 10);
-                const config = foundry.utils.deepClone(this.document.getFlag(MODULE_ID, "config") || {});
-                if (!config.state) config.state = {};
-                if (!Array.isArray(config.state.cryptex)) config.state.cryptex = [];
+                const config = this.document.getFlag(MODULE_ID, "config") || {};
+                const state = this.getPuzzleState();
+                if (!Array.isArray(state.cryptex)) state.cryptex = [];
 
                 const vals = (config[`cyl${id}_vals`] || "А,Б,В,Г,Д").split(",").map(s => s.trim());
-                const nextIndex = (Number.isInteger(config.state.cryptex[id]) ? config.state.cryptex[id] : 0) + 1;
-                config.state.cryptex[id] = nextIndex;
+                const nextIndex = (Number.isInteger(state.cryptex[id]) ? state.cryptex[id] : 0) + 1;
+                state.cryptex[id] = nextIndex;
 
-                const newSymbol = vals[nextIndex % vals.length];
-                const isImg = newSymbol.includes("/") || newSymbol.includes(".");
+                const rawSymbol = vals[nextIndex % vals.length];
+                const isImg = rawSymbol.includes("/") || rawSymbol.includes(".");
+                const newSymbol = isImg ? this.normalizeAssetPath(rawSymbol) : rawSymbol;
 
                 const content = e.currentTarget.querySelector(".cyl-content");
                 if (content) {
@@ -87,25 +88,29 @@ export class CryptexPuzzle extends BasePuzzleLock {
                     }, 150);
                 }
 
-                const soundSrc = (config.turnSound || "modules/enigma-box/sounds/statuedvizh.mp3").trim();
-                try {
-                    foundry.audio.AudioHelper.play({ src: soundSrc, volume: 0.7, autoplay: true }, true);
-                } catch (err) {}
+                const soundSrc = this.normalizeAssetPath(config.turnSound || "") || "modules/enigma-box/sounds/statuedvizh.mp3";
+                this.playSound(soundSrc, 0.7);
 
-                await this.document.setFlag(MODULE_ID, "config", config);
-                this._checkUnlock(config);
+                await this.savePuzzleState(state);
+                this._checkUnlock(config, state);
             });
         });
     }
 
-    async _checkUnlock(config) {
+    async _checkUnlock(config, state) {
         const count = parseInt(config.symCount, 10) || 4;
         let isSolved = true;
         for (let i = 0; i < count; i++) {
             const vals = (config[`cyl${i}_vals`] || "А,Б,В,Г,Д").split(",").map(s => s.trim());
-            const idx = Number.isInteger(config.state.cryptex[i]) ? config.state.cryptex[i] : 0;
-            const current = vals[idx % vals.length];
-            const sol = (config[`cyl${i}_sol`] || "А").trim();
+            const idx = Number.isInteger(state.cryptex?.[i]) ? state.cryptex[i] : 0;
+            const rawCurrent = vals[idx % vals.length];
+            const current = (rawCurrent.includes("/") || rawCurrent.includes("."))
+                ? this.normalizeAssetPath(rawCurrent)
+                : rawCurrent;
+            const rawSol = (config[`cyl${i}_sol`] || "А").trim();
+            const sol = (rawSol.includes("/") || rawSol.includes("."))
+                ? this.normalizeAssetPath(rawSol)
+                : rawSol;
             if (current !== sol) {
                 isSolved = false;
                 break;
