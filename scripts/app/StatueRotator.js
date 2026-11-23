@@ -25,28 +25,27 @@ export class StatueRotator extends BasePuzzleLock {
 
     async getData() {
         const data = await super.getData();
-        let config = this.document.getFlag(MODULE_ID, "config") || {};
+        const config = this.document.getFlag(MODULE_ID, "config") || {};
         data.description = config.description || "";
         const count = parseInt(config.statueCount, 10) || 3;
 
-        const isValidState = Array.isArray(config.state?.statues)
-            && config.state.statues.length === count
-            && config.state.statues.every(v => Number.isInteger(v) && v >= 0 && v <= 3);
+        const state = this.getPuzzleState();
+        const isValidState = Array.isArray(state.statues)
+            && state.statues.length === count
+            && state.statues.every(v => Number.isInteger(v) && v >= 0 && v <= 3);
 
         if (!isValidState) {
-            config = foundry.utils.deepClone(config);
-            if (!config.state) config.state = {};
-            config.state.statues = Array.from({ length: count }, () => Math.floor(Math.random() * 4));
-            await this.document.setFlag(MODULE_ID, "config", config);
+            state.statues = Array.from({ length: count }, () => Math.floor(Math.random() * 4));
+            await this.savePuzzleState(state);
         }
 
         const defaults = ["war", "bard", "hood", "war", "bard"];
         const suffixes = ["top", "right", "back", "left"];
 
-        data.statues = config.state.statues.map((dir, i) => {
+        data.statues = state.statues.map((dir, i) => {
             const safeDir = (Number.isInteger(dir) && dir >= 0 && dir <= 3) ? dir : 0;
             const fallback = `modules/enigma-box/img/${defaults[i % 5]}${suffixes[safeDir]}.png`;
-            const savedImg = (config[`statue-${i}-${safeDir}`] || "").trim();
+            const savedImg = this.normalizeAssetPath(config[`statue-${i}-${safeDir}`] || "");
             return {
                 id: i,
                 img: savedImg || fallback
@@ -63,38 +62,36 @@ export class StatueRotator extends BasePuzzleLock {
         container.querySelectorAll(".enigma-statue").forEach(statue => {
             statue.addEventListener("click", async (e) => {
                 const id = parseInt(e.currentTarget.dataset.id, 10);
-                const config = foundry.utils.deepClone(this.document.getFlag(MODULE_ID, "config") || {});
-                if (!config.state) config.state = {};
-                if (!Array.isArray(config.state.statues)) config.state.statues = [];
+                const config = this.document.getFlag(MODULE_ID, "config") || {};
+                const state = this.getPuzzleState();
+                if (!Array.isArray(state.statues)) state.statues = [];
 
-                const curDir = Number.isInteger(config.state.statues[id]) ? config.state.statues[id] : 0;
+                const curDir = Number.isInteger(state.statues[id]) ? state.statues[id] : 0;
                 const nextDir = (curDir + 1) % 4;
-                config.state.statues[id] = nextDir;
+                state.statues[id] = nextDir;
 
                 const defaults = ["war", "bard", "hood", "war", "bard"];
                 const suffixes = ["top", "right", "back", "left"];
                 const fallback = `modules/enigma-box/img/${defaults[id % 5]}${suffixes[nextDir]}.png`;
-                const savedImg = (config[`statue-${id}-${nextDir}`] || "").trim();
+                const savedImg = this.normalizeAssetPath(config[`statue-${id}-${nextDir}`] || "");
                 const nextImg = savedImg || fallback;
 
                 e.currentTarget.style.backgroundImage = `url('${nextImg}')`;
-                const soundSrc = (config.turnSound || "modules/enigma-box/sounds/statuedvizh.mp3").trim();
-                try {
-                    foundry.audio.AudioHelper.play({ src: soundSrc, volume: 0.7, autoplay: true }, true);
-                } catch (err) {}
+                const soundSrc = this.normalizeAssetPath(config.turnSound || "") || "modules/enigma-box/sounds/statuedvizh.mp3";
+                this.playSound(soundSrc, 0.7);
 
-                await this.document.setFlag(MODULE_ID, "config", config);
-                this._checkUnlock(config);
+                await this.savePuzzleState(state);
+                this._checkUnlock(config, state);
             });
         });
     }
 
-    async _checkUnlock(config) {
+    async _checkUnlock(config, state) {
         const count = parseInt(config.statueCount, 10) || 3;
         let isSolved = true;
         for (let i = 0; i < count; i++) {
             const sol = parseInt(config[`statue-${i}-sol`], 10) || 0;
-            const cur = Number.isInteger(config.state.statues[i]) ? config.state.statues[i] : 0;
+            const cur = Number.isInteger(state.statues?.[i]) ? state.statues[i] : 0;
             if ((cur % 4) !== sol) {
                 isSolved = false;
                 break;
