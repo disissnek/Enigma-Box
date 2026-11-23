@@ -6,12 +6,12 @@ export class MusicPuzzle extends BasePuzzleLock {
 
     static get formConfiguration() {
         const defaultNotes = [
-            "modules/enigma-box/sounds/woodsqueak_A.ogg",
-            "modules/enigma-box/sounds/woodsqueak_B.ogg",
-            "modules/enigma-box/sounds/woodsqueak_C.ogg",
-            "modules/enigma-box/sounds/woodsqueak_D.ogg",
-            "modules/enigma-box/sounds/woodsqueak_A.ogg",
-            "modules/enigma-box/sounds/woodsqueak_B.ogg"
+            "modules/enigma-box/sounds/Woodsqueak_A.ogg",
+            "modules/enigma-box/sounds/Woodsqueak_B.ogg",
+            "modules/enigma-box/sounds/Woodsqueak_C.ogg",
+            "modules/enigma-box/sounds/Woodsqueak_D.ogg",
+            "modules/enigma-box/sounds/Woodsqueak_A.ogg",
+            "modules/enigma-box/sounds/Woodsqueak_B.ogg"
         ];
         const inputs = [
             { name: "btnCount", label: "Количество кнопок (2-6)", type: "number", value: 4, min: 2, max: 6 },
@@ -42,12 +42,12 @@ export class MusicPuzzle extends BasePuzzleLock {
         const container = html[0] ?? html;
         const config = this.document.getFlag(MODULE_ID, "config") || {};
         const defaultNotes = [
-            "modules/enigma-box/sounds/woodsqueak_A.ogg",
-            "modules/enigma-box/sounds/woodsqueak_B.ogg",
-            "modules/enigma-box/sounds/woodsqueak_C.ogg",
-            "modules/enigma-box/sounds/woodsqueak_D.ogg",
-            "modules/enigma-box/sounds/woodsqueak_A.ogg",
-            "modules/enigma-box/sounds/woodsqueak_B.ogg"
+            "modules/enigma-box/sounds/woodsqueak_a.ogg",
+            "modules/enigma-box/sounds/woodsqueak_b.ogg",
+            "modules/enigma-box/sounds/woodsqueak_c.ogg",
+            "modules/enigma-box/sounds/woodsqueak_d.ogg",
+            "modules/enigma-box/sounds/woodsqueak_a.ogg",
+            "modules/enigma-box/sounds/woodsqueak_b.ogg"
         ];
 
         const targetSeq = (config.sequence || "1, 2, 3, 4")
@@ -66,7 +66,8 @@ export class MusicPuzzle extends BasePuzzleLock {
                 setTimeout(() => btn.classList.remove("active"), 350);
             }
             const customSrc = (config[`note${idx}`] || "").trim();
-            const src = customSrc || defaultNotes[idx % 6];
+            const src = defaultNotes.find(note => note.toLowerCase() === customSrc.toLowerCase())
+                || customSrc || defaultNotes[idx % 6];
             try {
                 foundry.audio.AudioHelper.play({ src, volume: 0.85, autoplay: true }, true);
             } catch (err) {
