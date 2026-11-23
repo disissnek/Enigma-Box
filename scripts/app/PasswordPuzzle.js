@@ -26,24 +26,23 @@ export class PasswordPuzzle extends BasePuzzleLock {
 
     async getData() {
         const data = await super.getData();
-        let config = this.document.getFlag(MODULE_ID, "config") || {};
+        const config = this.document.getFlag(MODULE_ID, "config") || {};
         data.description = config.description || "Введите код доступа...";
-        data.keypadBg = (config.keypadBg || "").trim() || "modules/enigma-box/img/cifers_bg.jpg";
-        data.keyBtnBg = (config.keyBtnBg || "").trim() || "modules/enigma-box/img/cifer_btn.png";
+        data.keypadBg = this.normalizeAssetPath(config.keypadBg || "") || "modules/enigma-box/img/cifers_bg.jpg";
+        data.keyBtnBg = this.normalizeAssetPath(config.keyBtnBg || "") || "modules/enigma-box/img/cifer_btn.png";
 
-        if (!config.state || typeof config.state.passInput !== "string") {
-            config = foundry.utils.deepClone(config);
-            if (!config.state) config.state = {};
-            config.state.passInput = "";
-            await this.document.setFlag(MODULE_ID, "config", config);
+        const state = this.getPuzzleState();
+        if (typeof state.passInput !== "string") {
+            state.passInput = "";
+            await this.savePuzzleState(state);
         }
 
-        data.currentInput = config.state.passInput;
+        data.currentInput = state.passInput;
 
         const keys = [];
         for (let i = 1; i <= 10; i++) {
             const val = i === 10 ? "0" : `${i}`;
-            const img = (config[`keyImg${i}`] || "").trim();
+            const img = this.normalizeAssetPath(config[`keyImg${i}`] || "");
             keys.push({
                 index: i,
                 val,
@@ -64,23 +63,19 @@ export class PasswordPuzzle extends BasePuzzleLock {
         container.querySelectorAll(".pass-key").forEach(btn => {
             btn.addEventListener("click", async (e) => {
                 const key = e.currentTarget.dataset.key;
-                const config = foundry.utils.deepClone(this.document.getFlag(MODULE_ID, "config") || {});
-                if (typeof config.state?.passInput !== "string") {
-                    if (!config.state) config.state = {};
-                    config.state.passInput = "";
-                }
+                const config = this.document.getFlag(MODULE_ID, "config") || {};
+                const state = this.getPuzzleState();
+                if (typeof state.passInput !== "string") state.passInput = "";
 
-                if (config.state.passInput.length < 10) {
-                    config.state.passInput += key;
+                if (state.passInput.length < 10) {
+                    state.passInput += key;
                     const display = container.querySelector(".pass-display-text");
-                    if (display) display.innerText = config.state.passInput;
+                    if (display) display.innerText = state.passInput;
 
-                    try {
-                        foundry.audio.AudioHelper.play({ src: "modules/enigma-box/sounds/Metal_Move01.wav", volume: 0.7, autoplay: true }, true);
-                    } catch (err) {}
+                    this.playSound("modules/enigma-box/sounds/metal_move01.wav", 0.7);
 
-                    await this.document.setFlag(MODULE_ID, "config", config);
-                    this._checkUnlock(config, container);
+                    await this.savePuzzleState(state);
+                    this._checkUnlock(config, state, container);
                 }
             });
         });
@@ -88,38 +83,32 @@ export class PasswordPuzzle extends BasePuzzleLock {
         const backBtn = container.querySelector(".pass-back");
         if (backBtn) {
             backBtn.addEventListener("click", async () => {
-                const config = foundry.utils.deepClone(this.document.getFlag(MODULE_ID, "config") || {});
-                if (!config.state) config.state = {};
-                config.state.passInput = "";
+                const state = this.getPuzzleState();
+                state.passInput = "";
 
                 const display = container.querySelector(".pass-display-text");
                 if (display) display.innerText = "";
 
-                try {
-                    foundry.audio.AudioHelper.play({ src: "modules/enigma-box/sounds/ComputerGameBeep01.wav", volume: 0.7, autoplay: true }, true);
-                } catch (err) {}
+                this.playSound("modules/enigma-box/sounds/computergamebeep01.wav", 0.7);
 
-                await this.document.setFlag(MODULE_ID, "config", config);
+                await this.savePuzzleState(state);
             });
         }
     }
 
-    async _checkUnlock(config, container) {
+    async _checkUnlock(config, state, container) {
         const target = (config.password || "1234").toString().trim();
-        if (config.state.passInput === target) {
+        if (state.passInput === target) {
             setTimeout(() => this.onUnlock(), 300);
-        } else if (config.state.passInput.length >= target.length) {
-            try {
-                foundry.audio.AudioHelper.play({ src: "modules/enigma-box/sounds/ComputerGameBeep01.wav", volume: 0.7, autoplay: true }, true);
-            } catch (err) {}
+        } else if (state.passInput.length >= target.length) {
+            this.playSound("modules/enigma-box/sounds/computergamebeep01.wav", 0.7);
             const display = container.querySelector(".pass-display-text");
             if (display) display.style.color = "#ff5555";
 
             setTimeout(async () => {
-                const freshConfig = foundry.utils.deepClone(this.document.getFlag(MODULE_ID, "config") || {});
-                if (!freshConfig.state) freshConfig.state = {};
-                freshConfig.state.passInput = "";
-                await this.document.setFlag(MODULE_ID, "config", freshConfig);
+                const freshState = this.getPuzzleState();
+                freshState.passInput = "";
+                await this.savePuzzleState(freshState);
                 if (display) {
                     display.innerText = "";
                     display.style.color = "#a3e5c0";
