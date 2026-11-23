@@ -1,11 +1,10 @@
 <div class="puzzle-inner-content">
     <h1>{{docName}}</h1>
     {{#if description}}<p class="enigma-desc">{{{description}}}</p>{{/if}}
-    
+
     <div class="enigma-clock-container" style="background-image: url('{{{clockFace}}}');">
-        <!-- ВАЖНО: data-type теперь hourClicks и minuteClicks -->
-        <div class="enigma-hand hand-hour" data-type="hourClicks" style="background-image: url('{{{handHour}}}'); transform: translateX(-50%) rotate({{degHour}}deg);"></div>
         <div class="enigma-hand hand-minute" data-type="minuteClicks" style="background-image: url('{{{handMinute}}}'); transform: translateX(-50%) rotate({{degMinute}}deg);"></div>
+        <div class="enigma-hand hand-hour" data-type="hourClicks" style="background-image: url('{{{handHour}}}'); transform: translateX(-50%) rotate({{degHour}}deg);"></div>
         <div class="clock-pin"></div>
     </div>
 </div>
