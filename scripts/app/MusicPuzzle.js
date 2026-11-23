@@ -6,12 +6,12 @@ export class MusicPuzzle extends BasePuzzleLock {
 
     static get formConfiguration() {
         const defaultNotes = [
-            "modules/enigma-box/sounds/Woodsqueak_A.ogg",
-            "modules/enigma-box/sounds/Woodsqueak_B.ogg",
-            "modules/enigma-box/sounds/Woodsqueak_C.ogg",
-            "modules/enigma-box/sounds/Woodsqueak_D.ogg",
-            "modules/enigma-box/sounds/Woodsqueak_A.ogg",
-            "modules/enigma-box/sounds/Woodsqueak_B.ogg"
+            "modules/enigma-box/sounds/woodsqueak_a.ogg",
+            "modules/enigma-box/sounds/woodsqueak_b.ogg",
+            "modules/enigma-box/sounds/woodsqueak_c.ogg",
+            "modules/enigma-box/sounds/woodsqueak_d.ogg",
+            "modules/enigma-box/sounds/woodsqueak_a.ogg",
+            "modules/enigma-box/sounds/woodsqueak_b.ogg"
         ];
         const inputs = [
             { name: "btnCount", label: "Количество кнопок (2-6)", type: "number", value: 4, min: 2, max: 6 },
@@ -59,24 +59,19 @@ export class MusicPuzzle extends BasePuzzleLock {
         let isPlaying = false;
         let isChecking = false;
 
-        const playNote = (idx) => {
+        const playSoundOnly = (idx) => {
+            const customSrc = this.normalizeAssetPath(config[`note${idx}`] || "");
+            const src = customSrc || defaultNotes[idx % 6];
+            this.playSound(src, 0.85);
+        };
+
+        const pressButton = (idx) => {
             const btn = container.querySelector(`.music-btn[data-id="${idx}"]`);
             if (btn) {
                 btn.classList.add("active");
-                setTimeout(() => btn.classList.remove("active"), 350);
+                setTimeout(() => btn.classList.remove("active"), 250);
             }
-            const customSrc = (config[`note${idx}`] || "").trim();
-            const src = defaultNotes.find(note => note.toLowerCase() === customSrc.toLowerCase())
-                || customSrc || defaultNotes[idx % 6];
-            try {
-                foundry.audio.AudioHelper.play({ src, volume: 0.85, autoplay: true }, true);
-            } catch (err) {
-                try {
-                    const audio = new Audio(src);
-                    audio.volume = 0.85;
-                    audio.play();
-                } catch (e) {}
-            }
+            playSoundOnly(idx);
         };
 
         const playBtn = container.querySelector(".play-melody-btn");
@@ -89,7 +84,7 @@ export class MusicPuzzle extends BasePuzzleLock {
 
                 targetSeq.forEach((noteIdx, step) => {
                     setTimeout(() => {
-                        playNote(noteIdx);
+                        playSoundOnly(noteIdx);
                         if (step === targetSeq.length - 1) {
                             setTimeout(() => {
                                 isPlaying = false;
@@ -105,7 +100,7 @@ export class MusicPuzzle extends BasePuzzleLock {
             btn.addEventListener("click", (e) => {
                 if (isPlaying || isChecking || targetSeq.length === 0) return;
                 const id = parseInt(e.currentTarget.dataset.id, 10);
-                playNote(id);
+                pressButton(id);
 
                 userSeq.push(id);
 
@@ -124,9 +119,7 @@ export class MusicPuzzle extends BasePuzzleLock {
                                 board.classList.add("error-flash");
                                 setTimeout(() => board.classList.remove("error-flash"), 450);
                             }
-                            try {
-                                foundry.audio.AudioHelper.play({ src: "modules/enigma-box/sounds/ComputerGameBeep01.wav", volume: 0.6, autoplay: true }, true);
-                            } catch (err) {}
+                            this.playSound("modules/enigma-box/sounds/computergamebeep01.wav", 0.6);
                         }, 350);
                     }
                 }
