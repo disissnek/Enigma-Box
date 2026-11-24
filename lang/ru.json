@@ -1,0 +1,138 @@
+{
+  "ENIGMA": {
+    "SettingLanguageName": "Язык интерфейса Enigma Box",
+    "SettingLanguageHint": "По умолчанию используется язык Foundry VTT, но можно выбрать русский или английский отдельно (в том числе для действий MATT).",
+    "LangAuto": "По умолчанию (язык Foundry)",
+    "LangRu": "Русский",
+    "LangEn": "English",
+    "ConfigButton": "Enigma Box",
+    "ConfigTitle": "Настройки Enigma Box",
+    "ConfigEnable": "Включить загадку?",
+    "ConfigType": "Тип загадки:",
+    "ConfigCustomTitle": "Заголовок окна:",
+    "ConfigCustomTitlePlaceholder": "Например: Дверь в гробницу...",
+    "ConfigDescription": "Художественное описание (контекст):",
+    "ConfigDescriptionPlaceholder": "Перед вами загадка...",
+    "ConfigSuccessTile": "ID целевого тайла (MATT):",
+    "ConfigSuccessTilePlaceholder": "Например: xyz123ABC...",
+    "ConfigPuzzleSection": "Настройки пазла",
+    "ConfigSave": "Сохранить",
+    "ConfigSaved": "Настройки Enigma Box сохранены!",
+    "DefaultWindowTitle": "Загадка: {name}",
+    "DefaultPuzzleHeader": "Тайна",
+    "UnlockSuccess": "Загадка решена!",
+    "OfflineGMNotice": "Мастер не в сети — дверь откроется автоматически, как только ГМ зайдёт в мир.",
+    "MattGroup": "Enigma Box",
+    "MattActionName": "Запустить загадку",
+    "MattActionLabel": "Запустить загадку (Enigma Box)",
+    "Types": {
+      "item-lock": "Слоты для предметов",
+      "image-wheel": "Вращение колец (Фреска)",
+      "statue-rotator": "Вращение статуй",
+      "clock-puzzle": "Старинные Часы",
+      "lever-puzzle": "Панель с Рычагами",
+      "match-puzzle": "Сопоставление фактов",
+      "music-puzzle": "Музыкальная секвенция",
+      "cryptex-puzzle": "Кодовый Криптекс (Вертикальный)",
+      "timeline-puzzle": "Таймлайн (Книги)",
+      "password-puzzle": "Кодовая панель (Циферблат)",
+      "text-password": "Пароль (Ввод с клавиатуры)",
+      "mirror-puzzle": "Световые Зеркала"
+    },
+    "ItemLock": {
+      "SlotCount": "Количество слотов (1-5)",
+      "ItemLabel": "Слот {num}: Название нужного предмета",
+      "SlotOccupiedTitle": "{name} (нажмите, чтобы забрать)",
+      "SlotEmptyTitle": "Перетащите предмет сюда"
+    },
+    "ImageWheel": {
+      "WheelImg": "Картинка Фрески",
+      "BgImg": "Фон под фреской",
+      "RingCount": "Количество кругов (2-6)",
+      "Segments": "Количество секторов (шагов на оборот)",
+      "StrictUpright": "Требуется вертикальное положение? (0 - Нет, 1 - Да)"
+    },
+    "StatueRotator": {
+      "StatueCount": "Количество статуй (1-5)",
+      "TurnSound": "Звук поворота статуи",
+      "Side0": "Статуя {num}: 0 - Спереди (top)",
+      "Side1": "Статуя {num}: 1 - Справа (right)",
+      "Side2": "Статуя {num}: 2 - Сзади (back)",
+      "Side3": "Статуя {num}: 3 - Слева (left)",
+      "Sol": "Статуя {num}: Решение (0-top, 1-right, 2-back, 3-left)"
+    },
+    "ClockPuzzle": {
+      "ClockFace": "Циферблат",
+      "HandHour": "Часовая (Короткая)",
+      "HandMinute": "Минутная (Длинная)",
+      "Segments": "Количество делений/секций на циферблате",
+      "SolHour": "Решение: Позиция часовой (от 1)",
+      "SolMinute": "Решение: Позиция минутной (от 1)"
+    },
+    "LeverPuzzle": {
+      "LeverCount": "Количество рычагов (2-6)",
+      "Positions": "Положений на рычаг (2-5)",
+      "HandleImg": "Картинка рукоятки",
+      "Sol": "Рычаг {num}: Решение (сверху вниз, от 0)"
+    },
+    "MatchPuzzle": {
+      "FrameImg": "Рамка портрета",
+      "StoneBg": "Текстура для фактов",
+      "ColCount": "Количество персонажей (2-4)",
+      "RowCount": "Количество строк фактов (1-3)",
+      "CharImg": "Персонаж {num}: Портрет",
+      "FactLabel": "Персонаж {charNum}: Факт {factNum}",
+      "DefaultFact": "Факт {charNum}-{factNum}"
+    },
+    "MusicPuzzle": {
+      "BtnCount": "Количество кнопок (2-6)",
+      "Sequence": "Последовательность кнопок (через запятую, от 1)",
+      "NoteLabel": "Звук кнопки {num}",
+      "PlayMelody": "Прослушать мелодию"
+    },
+    "CryptexPuzzle": {
+      "SymCount": "Кол-во цилиндров (1-6)",
+      "BracketImg": "Рамка (Края)",
+      "BgImg": "Фон под цилиндры",
+      "TurnSound": "Звук проворота цилиндра",
+      "CylVals": "Цилиндр {num}: Значения (буквы или пути к .png/.svg через запятую)",
+      "CylSol": "Цилиндр {num}: Решение"
+    },
+    "TimelinePuzzle": {
+      "BookCount": "Кол-во книг (2-12)",
+      "BgBack": "Фон полки (задник)",
+      "BgTopBot": "Верх/Низ полки",
+      "BgSides": "Боковины полки",
+      "BookTex": "Книга {num}: Обложка",
+      "BookText": "Книга {num}: Текст",
+      "DefaultBook": "Книга {num}"
+    },
+    "PasswordPuzzle": {
+      "KeypadBg": "Фон панели (с экраном и кнопкой стирания)",
+      "KeyBtnBg": "Картинка одной кнопки",
+      "Password": "Правильный пароль (цифры 0-9)",
+      "KeyImg": "Кнопка {num} (цифра {digit}) — иконка вместо цифры (необязательно)",
+      "DefaultDescription": "Введите код доступа...",
+      "ClearTitle": "Стереть"
+    },
+    "TextPasswordPuzzle": {
+      "PanelBg": "Фон панели (panel.jpg)",
+      "SecretPassword": "Правильный пароль (буквы или цифры)",
+      "CaseSensitive": "Учитывать регистр букв? (0 - Нет, 1 - Да)",
+      "PassPlaceholder": "Подсказка внутри поля",
+      "DefaultPlaceholder": "Введите пароль...",
+      "ClearTitle": "Стереть",
+      "SubmitTitle": "Проверить пароль"
+    },
+    "MirrorPuzzle": {
+      "MirrorFieldBg": "Фон поля (5x5)",
+      "StartImg": "Источник света",
+      "EndImg": "Приёмник кристалл",
+      "MirrorImg": "Картинка зеркала",
+      "LightImg": "Текстура луча",
+      "StartRow": "Строка источника слева (1-5)",
+      "EndRow": "Строка приёмника справа (1-5)",
+      "Mirrors": "Координаты зеркал (строка-колонка через запятую)"
+    }
+  }
+}

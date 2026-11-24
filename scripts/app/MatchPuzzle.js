@@ -1,4 +1,6 @@
 import { BasePuzzleLock } from "./BasePuzzleLock.js";
+import { enigmaLocalize } from "../main.js";
+
 const MODULE_ID = "enigma-box";
 
 export class MatchPuzzle extends BasePuzzleLock {
@@ -6,16 +8,28 @@ export class MatchPuzzle extends BasePuzzleLock {
 
     static get formConfiguration() {
         const inputs = [
-            { name: "frameImg", label: "Рамка портрета", type: "filepicker", value: "modules/enigma-box/img/frame (2).png" },
-            { name: "stoneBg", label: "Текстура для фактов", type: "filepicker", value: "modules/enigma-box/img/tablic.jpg" },
-            { name: "colCount", label: "Количество персонажей (2-4)", type: "number", value: 3, min: 2, max: 4 },
-            { name: "rowCount", label: "Количество строк фактов (1-3)", type: "number", value: 2, min: 1, max: 3 }
+            { name: "frameImg", label: enigmaLocalize("ENIGMA.MatchPuzzle.FrameImg"), type: "filepicker", value: "modules/enigma-box/img/frame (2).png" },
+            { name: "stoneBg", label: enigmaLocalize("ENIGMA.MatchPuzzle.StoneBg"), type: "filepicker", value: "modules/enigma-box/img/tablic.jpg" },
+            { name: "colCount", label: enigmaLocalize("ENIGMA.MatchPuzzle.ColCount"), type: "number", value: 3, min: 2, max: 4 },
+            { name: "rowCount", label: enigmaLocalize("ENIGMA.MatchPuzzle.RowCount"), type: "number", value: 2, min: 1, max: 3 }
         ];
 
         for (let c = 0; c < 4; c++) {
-            inputs.push({ name: `col${c}_img`, label: `Персонаж ${c + 1}: Портрет`, type: "filepicker", value: "icons/svg/mystery-man.svg" });
+            const charNum = c + 1;
+            inputs.push({
+                name: `col${c}_img`,
+                label: enigmaLocalize("ENIGMA.MatchPuzzle.CharImg", { num: charNum }),
+                type: "filepicker",
+                value: "icons/svg/mystery-man.svg"
+            });
             for (let r = 0; r < 3; r++) {
-                inputs.push({ name: `col${c}_fact${r}`, label: `Персонаж ${c + 1}: Факт ${r + 1}`, type: "text", value: `Факт ${c + 1}-${r + 1}` });
+                const factNum = r + 1;
+                inputs.push({
+                    name: `col${c}_fact${r}`,
+                    label: enigmaLocalize("ENIGMA.MatchPuzzle.FactLabel", { charNum, factNum }),
+                    type: "text",
+                    value: enigmaLocalize("ENIGMA.MatchPuzzle.DefaultFact", { charNum, factNum })
+                });
             }
         }
         return { inputs };
@@ -52,9 +66,11 @@ export class MatchPuzzle extends BasePuzzleLock {
             img: this.normalizeAssetPath(config[`col${c}_img`] || "") || "icons/svg/mystery-man.svg",
             facts: Array.from({ length: rows }, (_, r) => {
                 const ownerCol = state.match[r][c];
+                const charNum = ownerCol + 1;
+                const factNum = r + 1;
                 return {
                     rowId: r,
-                    text: config[`col${ownerCol}_fact${r}`] || `Факт ${ownerCol + 1}-${r + 1}`
+                    text: config[`col${ownerCol}_fact${r}`] || enigmaLocalize("ENIGMA.MatchPuzzle.DefaultFact", { charNum, factNum })
                 };
             })
         }));

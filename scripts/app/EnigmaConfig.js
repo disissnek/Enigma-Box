@@ -1,4 +1,21 @@
+import { enigmaLocalize } from "../main.js";
+
 const MODULE_ID = "enigma-box";
+
+const PUZZLE_TYPES = [
+    "item-lock",
+    "image-wheel",
+    "statue-rotator",
+    "clock-puzzle",
+    "lever-puzzle",
+    "match-puzzle",
+    "music-puzzle",
+    "cryptex-puzzle",
+    "timeline-puzzle",
+    "password-puzzle",
+    "text-password",
+    "mirror-puzzle"
+];
 
 const PUZZLE_REGISTRY = {
     "item-lock": { file: "ItemLock.js", className: "ItemLock" },
@@ -36,9 +53,12 @@ export class EnigmaConfig extends FormApplication {
             template: `modules/${MODULE_ID}/templates/config.hbs`,
             width: 450,
             height: "auto",
-            title: "Настройки Enigma Box",
             closeOnSubmit: true
         });
+    }
+
+    get title() {
+        return enigmaLocalize("ENIGMA.ConfigTitle");
     }
 
     async getData() {
@@ -70,11 +90,31 @@ export class EnigmaConfig extends FormApplication {
             const rawVal = config[i.name] !== undefined ? config[i.name] : i.value;
             return {
                 ...i,
+                label: enigmaLocalize(i.label),
                 value: normalizeModulePath(rawVal)
             };
         });
 
-        return { config, inputs };
+        const puzzleTypes = PUZZLE_TYPES.map(t => ({
+            value: t,
+            label: enigmaLocalize(`ENIGMA.Types.${t}`),
+            selected: config.type === t
+        }));
+
+        const labels = {
+            enable: enigmaLocalize("ENIGMA.ConfigEnable"),
+            type: enigmaLocalize("ENIGMA.ConfigType"),
+            customTitle: enigmaLocalize("ENIGMA.ConfigCustomTitle"),
+            customTitlePlaceholder: enigmaLocalize("ENIGMA.ConfigCustomTitlePlaceholder"),
+            description: enigmaLocalize("ENIGMA.ConfigDescription"),
+            descriptionPlaceholder: enigmaLocalize("ENIGMA.ConfigDescriptionPlaceholder"),
+            successTile: enigmaLocalize("ENIGMA.ConfigSuccessTile"),
+            successTilePlaceholder: enigmaLocalize("ENIGMA.ConfigSuccessTilePlaceholder"),
+            puzzleSection: enigmaLocalize("ENIGMA.ConfigPuzzleSection"),
+            save: enigmaLocalize("ENIGMA.ConfigSave")
+        };
+
+        return { config, inputs, puzzleTypes, labels };
     }
 
     activateListeners(html) {
@@ -94,6 +134,6 @@ export class EnigmaConfig extends FormApplication {
             config[k] = normalizeModulePath(v);
         }
         await this.document.setFlag(MODULE_ID, "config", config);
-        ui.notifications.success("Настройки Enigma Box сохранены!");
+        ui.notifications.success(enigmaLocalize("ENIGMA.ConfigSaved"));
     }
 }

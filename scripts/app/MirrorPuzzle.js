@@ -1,4 +1,6 @@
 import { BasePuzzleLock } from "./BasePuzzleLock.js";
+import { enigmaLocalize } from "../main.js";
+
 const MODULE_ID = "enigma-box";
 
 export class MirrorPuzzle extends BasePuzzleLock {
@@ -7,14 +9,14 @@ export class MirrorPuzzle extends BasePuzzleLock {
     static get formConfiguration() {
         return {
             inputs: [
-                { name: "mirrorFieldBg", label: "Фон поля (5x5)", type: "filepicker", value: "modules/enigma-box/img/backmirrors.png" },
-                { name: "startImg", label: "Источник света", type: "filepicker", value: "modules/enigma-box/img/mirrorstart.png" },
-                { name: "endImg", label: "Приёмник кристалл", type: "filepicker", value: "modules/enigma-box/img/mirrorend.png" },
-                { name: "mirrorImg", label: "Картинка зеркала", type: "filepicker", value: "modules/enigma-box/img/mirror.png" },
-                { name: "lightImg", label: "Текстура луча", type: "filepicker", value: "modules/enigma-box/img/mirrorlight.png" },
-                { name: "startRow", label: "Строка источника слева (1-5)", type: "number", value: 3, min: 1, max: 5 },
-                { name: "endRow", label: "Строка приёмника справа (1-5)", type: "number", value: 3, min: 1, max: 5 },
-                { name: "mirrors", label: "Координаты зеркал (строка-колонка через запятую)", type: "text", value: "3-2, 1-2, 1-4, 3-4" }
+                { name: "mirrorFieldBg", label: enigmaLocalize("ENIGMA.MirrorPuzzle.MirrorFieldBg"), type: "filepicker", value: "modules/enigma-box/img/backmirrors.png" },
+                { name: "startImg", label: enigmaLocalize("ENIGMA.MirrorPuzzle.StartImg"), type: "filepicker", value: "modules/enigma-box/img/mirrorstart.png" },
+                { name: "endImg", label: enigmaLocalize("ENIGMA.MirrorPuzzle.EndImg"), type: "filepicker", value: "modules/enigma-box/img/mirrorend.png" },
+                { name: "mirrorImg", label: enigmaLocalize("ENIGMA.MirrorPuzzle.MirrorImg"), type: "filepicker", value: "modules/enigma-box/img/mirror.png" },
+                { name: "lightImg", label: enigmaLocalize("ENIGMA.MirrorPuzzle.LightImg"), type: "filepicker", value: "modules/enigma-box/img/mirrorlight.png" },
+                { name: "startRow", label: enigmaLocalize("ENIGMA.MirrorPuzzle.StartRow"), type: "number", value: 3, min: 1, max: 5 },
+                { name: "endRow", label: enigmaLocalize("ENIGMA.MirrorPuzzle.EndRow"), type: "number", value: 3, min: 1, max: 5 },
+                { name: "mirrors", label: enigmaLocalize("ENIGMA.MirrorPuzzle.Mirrors"), type: "text", value: "3-2, 1-2, 1-4, 3-4" }
             ]
         };
     }

@@ -1,0 +1,138 @@
+{
+  "ENIGMA": {
+    "SettingLanguageName": "Enigma Box Language",
+    "SettingLanguageHint": "Defaults to the Foundry VTT language, or you can force Russian or English separately (including for MATT actions).",
+    "LangAuto": "Default (Foundry Language)",
+    "LangRu": "Русский",
+    "LangEn": "English",
+    "ConfigButton": "Enigma Box",
+    "ConfigTitle": "Enigma Box Settings",
+    "ConfigEnable": "Enable puzzle?",
+    "ConfigType": "Puzzle type:",
+    "ConfigCustomTitle": "Window title:",
+    "ConfigCustomTitlePlaceholder": "For example: Tomb Door...",
+    "ConfigDescription": "Flavor description (context):",
+    "ConfigDescriptionPlaceholder": "Before you lies a puzzle...",
+    "ConfigSuccessTile": "Target tile ID (MATT):",
+    "ConfigSuccessTilePlaceholder": "For example: xyz123ABC...",
+    "ConfigPuzzleSection": "Puzzle Settings",
+    "ConfigSave": "Save",
+    "ConfigSaved": "Enigma Box settings saved!",
+    "DefaultWindowTitle": "Puzzle: {name}",
+    "DefaultPuzzleHeader": "Mystery",
+    "UnlockSuccess": "Puzzle solved!",
+    "OfflineGMNotice": "The GM is offline — the door will open automatically once the GM joins the world.",
+    "MattGroup": "Enigma Box",
+    "MattActionName": "Run Puzzle",
+    "MattActionLabel": "Run Puzzle (Enigma Box)",
+    "Types": {
+      "item-lock": "Item Slots",
+      "image-wheel": "Rotating Rings (Fresco)",
+      "statue-rotator": "Statue Rotator",
+      "clock-puzzle": "Antique Clock",
+      "lever-puzzle": "Lever Panel",
+      "match-puzzle": "Fact Matching",
+      "music-puzzle": "Musical Sequence",
+      "cryptex-puzzle": "Cryptex Lock",
+      "timeline-puzzle": "Bookshelf Timeline",
+      "password-puzzle": "Numeric Keypad",
+      "text-password": "Password Panel",
+      "mirror-puzzle": "Light Mirrors"
+    },
+    "ItemLock": {
+      "SlotCount": "Number of slots (1-5)",
+      "ItemLabel": "Slot {num}: Required item name",
+      "SlotOccupiedTitle": "{name} (click to take)",
+      "SlotEmptyTitle": "Drop item here"
+    },
+    "ImageWheel": {
+      "WheelImg": "Fresco Image",
+      "BgImg": "Background behind fresco",
+      "RingCount": "Number of rings (2-6)",
+      "Segments": "Number of sectors (steps per rotation)",
+      "StrictUpright": "Must be assembled upright? (0 - No, 1 - Yes)"
+    },
+    "StatueRotator": {
+      "StatueCount": "Number of statues (1-5)",
+      "TurnSound": "Statue rotation sound",
+      "Side0": "Statue {num}: 0 - Front (top)",
+      "Side1": "Statue {num}: 1 - Right (right)",
+      "Side2": "Statue {num}: 2 - Back (back)",
+      "Side3": "Statue {num}: 3 - Left (left)",
+      "Sol": "Statue {num}: Solution (0-top, 1-right, 2-back, 3-left)"
+    },
+    "ClockPuzzle": {
+      "ClockFace": "Clock face",
+      "HandHour": "Hour hand (Short)",
+      "HandMinute": "Minute hand (Long)",
+      "Segments": "Number of sections/ticks on the clock face",
+      "SolHour": "Solution: Hour hand position (from 1)",
+      "SolMinute": "Solution: Minute hand position (from 1)"
+    },
+    "LeverPuzzle": {
+      "LeverCount": "Number of levers (2-6)",
+      "Positions": "Positions per lever (2-5)",
+      "HandleImg": "Handle image",
+      "Sol": "Lever {num}: Solution (top to bottom, from 0)"
+    },
+    "MatchPuzzle": {
+      "FrameImg": "Portrait frame",
+      "StoneBg": "Fact texture",
+      "ColCount": "Number of characters (2-4)",
+      "RowCount": "Number of fact rows (1-3)",
+      "CharImg": "Character {num}: Portrait",
+      "FactLabel": "Character {charNum}: Fact {factNum}",
+      "DefaultFact": "Fact {charNum}-{factNum}"
+    },
+    "MusicPuzzle": {
+      "BtnCount": "Number of buttons (2-6)",
+      "Sequence": "Button sequence (comma-separated, from 1)",
+      "NoteLabel": "Button {num} sound",
+      "PlayMelody": "Play Melody"
+    },
+    "CryptexPuzzle": {
+      "SymCount": "Number of cylinders (1-6)",
+      "BracketImg": "Frame (Ends)",
+      "BgImg": "Background under cylinders",
+      "TurnSound": "Cylinder rotation sound",
+      "CylVals": "Cylinder {num}: Values (letters or .png/.svg paths separated by commas)",
+      "CylSol": "Cylinder {num}: Solution"
+    },
+    "TimelinePuzzle": {
+      "BookCount": "Number of books (2-12)",
+      "BgBack": "Shelf background (back)",
+      "BgTopBot": "Shelf top/bottom",
+      "BgSides": "Shelf sides",
+      "BookTex": "Book {num}: Spine/Cover",
+      "BookText": "Book {num}: Text",
+      "DefaultBook": "Book {num}"
+    },
+    "PasswordPuzzle": {
+      "KeypadBg": "Panel background (with screen and clear button)",
+      "KeyBtnBg": "Single button image",
+      "Password": "Correct password (digits 0-9)",
+      "KeyImg": "Button {num} (digit {digit}) — icon instead of digit (optional)",
+      "DefaultDescription": "Enter access code...",
+      "ClearTitle": "Clear"
+    },
+    "TextPasswordPuzzle": {
+      "PanelBg": "Panel background (panel.jpg)",
+      "SecretPassword": "Correct password (letters or digits)",
+      "CaseSensitive": "Case-sensitive? (0 - No, 1 - Yes)",
+      "PassPlaceholder": "Placeholder inside input field",
+      "DefaultPlaceholder": "Enter password...",
+      "ClearTitle": "Clear",
+      "SubmitTitle": "Check password"
+    },
+    "MirrorPuzzle": {
+      "MirrorFieldBg": "Board background (5x5)",
+      "StartImg": "Light source",
+      "EndImg": "Crystal receiver",
+      "MirrorImg": "Mirror image",
+      "LightImg": "Beam texture",
+      "StartRow": "Source row on left (1-5)",
+      "EndRow": "Receiver row on right (1-5)",
+      "Mirrors": "Mirror coordinates (row-col separated by commas)"
+    }
+  }
+}

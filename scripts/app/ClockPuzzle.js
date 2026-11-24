@@ -1,4 +1,6 @@
 import { BasePuzzleLock } from "./BasePuzzleLock.js";
+import { enigmaLocalize } from "../main.js";
+
 const MODULE_ID = "enigma-box";
 
 export class ClockPuzzle extends BasePuzzleLock {
@@ -11,11 +13,11 @@ export class ClockPuzzle extends BasePuzzleLock {
     static get formConfiguration() {
         return {
             inputs: [
-                { name: "clockFace", label: "Циферблат", type: "filepicker", value: "modules/enigma-box/img/clock.svg" },
-                { name: "handHour", label: "Часовая (Короткая)", type: "filepicker", value: "modules/enigma-box/img/arrow1.svg" },
-                { name: "handMinute", label: "Минутная (Длинная)", type: "filepicker", value: "modules/enigma-box/img/arrow2.svg" },
-                { name: "solHour", label: "Решение: Часы (1-12)", type: "number", value: 12, min: 1, max: 12 },
-                { name: "solMinute", label: "Решение: Минуты (1-12)", type: "number", value: 12, min: 1, max: 12 }
+                { name: "clockFace", label: enigmaLocalize("ENIGMA.ClockPuzzle.ClockFace"), type: "filepicker", value: "modules/enigma-box/img/clock.svg" },
+                { name: "handHour", label: enigmaLocalize("ENIGMA.ClockPuzzle.HandHour"), type: "filepicker", value: "modules/enigma-box/img/arrow1.svg" },
+                { name: "handMinute", label: enigmaLocalize("ENIGMA.ClockPuzzle.HandMinute"), type: "filepicker", value: "modules/enigma-box/img/arrow2.svg" },
+                { name: "solHour", label: enigmaLocalize("ENIGMA.ClockPuzzle.SolHour"), type: "number", value: 12, min: 1, max: 12 },
+                { name: "solMinute", label: enigmaLocalize("ENIGMA.ClockPuzzle.SolMinute"), type: "number", value: 12, min: 1, max: 12 }
             ]
         };
     }

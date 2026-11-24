@@ -15,9 +15,113 @@ const PUZZLE_REGISTRY = {
     "mirror-puzzle": { file: "MirrorPuzzle.js", className: "MirrorPuzzle" }
 };
 
+let customTranslations = null;
+
+function getByPath(obj, path) {
+    return path.split(".").reduce((acc, part) => (acc && acc[part] !== undefined ? acc[part] : undefined), obj);
+}
+
+function formatTemplate(str, data = {}) {
+    return String(str).replace(/\{(\w+)\}/g, (_, k) => (data[k] !== undefined ? data[k] : `{${k}}`));
+}
+
+export function enigmaLocalize(key, data = null) {
+    let raw = customTranslations ? getByPath(customTranslations, key) : undefined;
+    if (raw === undefined) {
+        raw = data ? game.i18n.format(key, data) : game.i18n.localize(key);
+        return raw;
+    }
+    return data ? formatTemplate(raw, data) : raw;
+}
+
+async function loadLocaleDictionary(langCode) {
+    if (!langCode || langCode === "auto") {
+        customTranslations = null;
+        return;
+    }
+    try {
+        const res = await fetch(`modules/${MODULE_ID}/lang/${langCode}.json`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        customTranslations = await res.json();
+    } catch (err) {
+        console.error(`Enigma Box | Не удалось загрузить словарь lang/${langCode}.json:`, err);
+        customTranslations = null;
+    }
+}
+
+function refreshMattRegistry() {
+    const matt = game.MonksActiveTiles;
+    if (!matt?.triggerGroups || !matt?.triggerActions) return;
+    matt.triggerGroups["enigmabox"] = { name: enigmaLocalize("ENIGMA.MattGroup") };
+    if (matt.triggerActions["enigmabox.openpuzzle"]) {
+        matt.triggerActions["enigmabox.openpuzzle"].name = enigmaLocalize("ENIGMA.MattActionName");
+        matt.triggerActions["enigmabox.openpuzzle"].content = async function () {
+            return `<span class="action-style">${enigmaLocalize("ENIGMA.MattActionLabel")}</span>`;
+        };
+    }
+}
+
 function getPuzzleConfig(doc) {
     if (!doc?.getFlag) return null;
     return doc.getFlag(MODULE_ID, "config");
+}
+
+function resolveSceneDocument(sceneId, docName, docId) {
+    const scene = game.scenes.get(sceneId) || canvas.scene;
+    if (!scene) return null;
+    if (docName === "Wall") return scene.walls.get(docId) || null;
+    if (docName === "Tile") return scene.tiles.get(docId) || null;
+    if (docName === "Token") return scene.tokens.get(docId) || null;
+    return null;
+}
+
+async function applyUnlockAsGM(data) {
+    const doc = resolveSceneDocument(data.sceneId, data.docName, data.docId);
+    if (!doc) return;
+
+    doc.enigmaSolved = true;
+    const config = foundry.utils.deepClone(doc.getFlag(MODULE_ID, "config") || {});
+    config.isActive = false;
+
+    try {
+        await doc.setFlag(MODULE_ID, "config", config);
+    } catch (err) {
+        console.error("Enigma Box | Ошибка обновления флага разблокировки:", err);
+    }
+
+    if (data.mattActionId && typeof doc.resumeActions === "function") {
+        doc.resumeActions(data.mattActionId, { continue: true });
+    } else if (doc.documentName === "Wall") {
+        try {
+            await doc.update({ ds: CONST.WALL_DOOR_STATES.OPEN });
+        } catch (err) {
+            console.error("Enigma Box | Ошибка открытия двери:", err);
+        }
+    }
+
+    if (config.successTileId) {
+        const scene = game.scenes.get(data.sceneId) || canvas.scene;
+        const targetTile = scene?.tiles.get(config.successTileId);
+        if (targetTile && typeof targetTile.document?.trigger === "function") {
+            targetTile.document.trigger({ tokens: [], userId: data.senderId || game.user.id, method: "manual" });
+        }
+    }
+}
+
+async function processPendingUnlocks() {
+    const storageKey = `enigma-box-pending-${game.world.id}`;
+    let pending = [];
+    try {
+        pending = JSON.parse(localStorage.getItem(storageKey) || "[]");
+    } catch (e) {
+        pending = [];
+    }
+    if (!Array.isArray(pending) || pending.length === 0) return;
+
+    localStorage.removeItem(storageKey);
+    for (const item of pending) {
+        await applyUnlockAsGM(item);
+    }
 }
 
 async function openConfig(doc) {
@@ -38,7 +142,7 @@ async function openPuzzle(document, mattActionId = null) {
 
     const entry = PUZZLE_REGISTRY[config.type];
     if (!entry) {
-        ui.notifications.warn(`Enigma Box: Неизвестный тип загадки "${config.type}"`);
+        ui.notifications.warn(`Enigma Box: Unknown puzzle type "${config.type}"`);
         return false;
     }
 
@@ -61,9 +165,9 @@ async function openPuzzle(document, mattActionId = null) {
 
 function injectMattAction(matt) {
     if (!matt) return;
-    matt.triggerGroups["enigmabox"] = { name: "Enigma Box" };
+    matt.triggerGroups["enigmabox"] = { name: enigmaLocalize("ENIGMA.MattGroup") };
     matt.triggerActions["enigmabox.openpuzzle"] = {
-        name: "Запустить загадку",
+        name: enigmaLocalize("ENIGMA.MattActionName"),
         group: "enigmabox",
         ctrls: [],
         fn: async function (args = {}) {
@@ -78,19 +182,101 @@ function injectMattAction(matt) {
             return { continue: true };
         },
         content: async function () {
-            return `<span class="action-style">Запустить загадку (Enigma Box)</span>`;
+            return `<span class="action-style">${enigmaLocalize("ENIGMA.MattActionLabel")}</span>`;
         }
     };
 }
 
+function syncDocumentFlagUpdate(doc, changed) {
+    if (!changed?.flags?.[MODULE_ID]) return;
+    delete doc._enigmaLocalState;
+    const cfg = doc.getFlag(MODULE_ID, "config");
+    if (cfg?.isActive) doc.enigmaSolved = false;
+}
+
+Hooks.once("init", () => {
+    game.settings.register(MODULE_ID, "language", {
+        name: game.i18n.localize("ENIGMA.SettingLanguageName"),
+        hint: game.i18n.localize("ENIGMA.SettingLanguageHint"),
+        scope: "world",
+        config: true,
+        type: String,
+        choices: {
+            auto: "ENIGMA.LangAuto",
+            ru: "ENIGMA.LangRu",
+            en: "ENIGMA.LangEn"
+        },
+        default: "auto",
+        onChange: async (value) => {
+            await loadLocaleDictionary(value);
+            refreshMattRegistry();
+        }
+    });
+});
+
 Hooks.on("setupTileActions", (matt) => injectMattAction(matt));
+Hooks.on("updateWall", syncDocumentFlagUpdate);
+Hooks.on("updateTile", syncDocumentFlagUpdate);
+Hooks.on("updateToken", syncDocumentFlagUpdate);
 
-Hooks.once("ready", () => {
+Hooks.once("ready", async () => {
+    const selectedLang = game.settings.get(MODULE_ID, "language");
+    await loadLocaleDictionary(selectedLang);
+
     const module = game.modules.get(MODULE_ID);
-    if (module) module.api = { open: openPuzzle };
+    if (module) module.api = { open: openPuzzle, localize: enigmaLocalize };
 
-    if (game.MonksActiveTiles && !game.MonksActiveTiles.triggerActions["enigmabox.openpuzzle"]) {
-        injectMattAction(game.MonksActiveTiles);
+    if (game.MonksActiveTiles) {
+        if (!game.MonksActiveTiles.triggerActions["enigmabox.openpuzzle"]) {
+            injectMattAction(game.MonksActiveTiles);
+        } else {
+            refreshMattRegistry();
+        }
+    }
+
+    if (game.user.isGM && game.users.activeGM?.id === game.user.id) {
+        await processPendingUnlocks();
+    }
+
+    if (game.socket) {
+        game.socket.on(`module.${MODULE_ID}`, async (data) => {
+            if (!data || !data.docId) return;
+            const doc = resolveSceneDocument(data.sceneId, data.docName, data.docId);
+            if (!doc) return;
+
+            const isDesignatedGM = game.user.isGM && game.users.activeGM?.id === game.user.id;
+
+            if (data.action === "saveState") {
+                doc._enigmaLocalState = foundry.utils.deepClone(data.state);
+                if (data.senderId !== game.user.id) {
+                    Object.values(ui.windows).forEach(win => {
+                        if (win.document?.id === doc.id && typeof win.render === "function") {
+                            win.render(false);
+                        }
+                    });
+                }
+                if (isDesignatedGM) {
+                    const config = foundry.utils.deepClone(doc.getFlag(MODULE_ID, "config") || {});
+                    config.state = foundry.utils.deepClone(data.state);
+                    try {
+                        await doc.setFlag(MODULE_ID, "config", config);
+                    } catch (err) {
+                        console.error("Enigma Box | Ошибка сохранения состояния от игрока:", err);
+                    }
+                }
+            } else if (data.action === "unlock") {
+                doc.enigmaSolved = true;
+                Object.values(ui.windows).forEach(win => {
+                    if (win.document?.id === doc.id && typeof win.close === "function") {
+                        win.close();
+                    }
+                });
+
+                if (isDesignatedGM) {
+                    await applyUnlockAsGM(data);
+                }
+            }
+        });
     }
 
     if (!game.modules.get("lib-wrapper")?.active) return;
@@ -101,7 +287,7 @@ Hooks.once("ready", () => {
             if (game.user.isGM && game.keyboard.isModifierActive("Alt")) return wrapped(...args);
 
             const config = getPuzzleConfig(this.wall.document);
-            if (event?.button === 0 && this.wall.document.ds === CONST.WALL_DOOR_STATES.LOCKED && config?.isActive) {
+            if (event?.button === 0 && this.wall.document.ds === CONST.WALL_DOOR_STATES.LOCKED && config?.isActive && !this.wall.document.enigmaSolved) {
                 openPuzzle(this.wall.document);
                 if (event.stopPropagation) event.stopPropagation();
                 return;
@@ -137,7 +323,7 @@ function injectConfigButtonV1(app, buttons) {
     buttons.unshift({
         class: config?.isActive ? "enigma-box-locked" : "enigma-box",
         icon: "fas fa-puzzle-piece",
-        label: "Enigma Box",
+        label: enigmaLocalize("ENIGMA.ConfigButton"),
         onclick: () => openConfig(doc)
     });
 }
@@ -151,11 +337,12 @@ function injectConfigButtonV2(app, element) {
     if (!header || header.querySelector(".enigma-box-header-btn")) return;
 
     const config = getPuzzleConfig(doc);
+    const label = enigmaLocalize("ENIGMA.ConfigButton");
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "header-control icon fas fa-puzzle-piece enigma-box-header-btn";
-    btn.title = "Enigma Box";
-    btn.setAttribute("data-tooltip", "Enigma Box");
+    btn.title = label;
+    btn.setAttribute("data-tooltip", label);
     if (config?.isActive) btn.style.color = "gold";
 
     btn.addEventListener("click", (e) => {
@@ -179,9 +366,10 @@ function injectHUDButton(hud, html) {
     if (!colLeft || colLeft.querySelector(".enigma-box-hud-btn")) return;
 
     const config = getPuzzleConfig(doc);
+    const label = enigmaLocalize("ENIGMA.ConfigButton");
     const btn = document.createElement("div");
     btn.className = `control-icon enigma-box-hud-btn ${config?.isActive ? "active" : ""}`;
-    btn.title = "Enigma Box";
+    btn.title = label;
     btn.innerHTML = `<i class="fas fa-puzzle-piece" ${config?.isActive ? 'style="color: gold;"' : ""}></i>`;
 
     btn.addEventListener("click", (e) => {

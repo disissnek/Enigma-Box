@@ -1,4 +1,6 @@
 import { BasePuzzleLock } from "./BasePuzzleLock.js";
+import { enigmaLocalize } from "../main.js";
+
 const MODULE_ID = "enigma-box";
 
 export class CryptexPuzzle extends BasePuzzleLock {
@@ -10,15 +12,16 @@ export class CryptexPuzzle extends BasePuzzleLock {
 
     static get formConfiguration() {
         const inputs = [
-            { name: "symCount", label: "Кол-во цилиндров (1-6)", type: "number", value: 4, min: 1, max: 6 },
-            { name: "bracketImg", label: "Рамка (Края)", type: "filepicker", value: "modules/enigma-box/img/kraicill.png" },
-            { name: "bgImg", label: "Фон под цилиндры", type: "filepicker", value: "modules/enigma-box/img/cilindrifon.png" },
-            { name: "turnSound", label: "Звук проворота цилиндра", type: "audiopicker", value: "modules/enigma-box/sounds/statuedvizh.mp3" }
+            { name: "symCount", label: enigmaLocalize("ENIGMA.CryptexPuzzle.SymCount"), type: "number", value: 4, min: 1, max: 6 },
+            { name: "bracketImg", label: enigmaLocalize("ENIGMA.CryptexPuzzle.BracketImg"), type: "filepicker", value: "modules/enigma-box/img/kraicill.png" },
+            { name: "bgImg", label: enigmaLocalize("ENIGMA.CryptexPuzzle.BgImg"), type: "filepicker", value: "modules/enigma-box/img/cilindrifon.png" },
+            { name: "turnSound", label: enigmaLocalize("ENIGMA.CryptexPuzzle.TurnSound"), type: "audiopicker", value: "modules/enigma-box/sounds/statuedvizh.mp3" }
         ];
 
         for (let i = 0; i < 6; i++) {
-            inputs.push({ name: `cyl${i}_vals`, label: `Цилиндр ${i + 1}: Значения (буквы или пути к .png/.svg через запятую)`, type: "text", value: "А,Б,В,Г,Д" });
-            inputs.push({ name: `cyl${i}_sol`, label: `Цилиндр ${i + 1}: Решение`, type: "text", value: "А" });
+            const num = i + 1;
+            inputs.push({ name: `cyl${i}_vals`, label: enigmaLocalize("ENIGMA.CryptexPuzzle.CylVals", { num }), type: "text", value: "А,Б,В,Г,Д" });
+            inputs.push({ name: `cyl${i}_sol`, label: enigmaLocalize("ENIGMA.CryptexPuzzle.CylSol", { num }), type: "text", value: "А" });
         }
         return { inputs };
     }

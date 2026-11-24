@@ -1,4 +1,6 @@
 import { BasePuzzleLock } from "./BasePuzzleLock.js";
+import { enigmaLocalize } from "../main.js";
+
 const MODULE_ID = "enigma-box";
 
 export class StatueRotator extends BasePuzzleLock {
@@ -7,17 +9,18 @@ export class StatueRotator extends BasePuzzleLock {
     static get formConfiguration() {
         const defaults = ["war", "bard", "hood", "war", "bard"];
         const inputs = [
-            { name: "statueCount", label: "Количество статуй (1-5)", type: "number", value: 3, min: 1, max: 5 },
-            { name: "turnSound", label: "Звук поворота статуи", type: "audiopicker", value: "modules/enigma-box/sounds/statuedvizh.mp3" }
+            { name: "statueCount", label: enigmaLocalize("ENIGMA.StatueRotator.StatueCount"), type: "number", value: 3, min: 1, max: 5 },
+            { name: "turnSound", label: enigmaLocalize("ENIGMA.StatueRotator.TurnSound"), type: "audiopicker", value: "modules/enigma-box/sounds/statuedvizh.mp3" }
         ];
 
         for (let i = 0; i < 5; i++) {
             const base = defaults[i];
-            inputs.push({ name: `statue-${i}-0`, label: `Статуя ${i + 1}: 0 - Спереди (top)`, type: "filepicker", value: `modules/enigma-box/img/${base}top.png` });
-            inputs.push({ name: `statue-${i}-1`, label: `Статуя ${i + 1}: 1 - Справа (right)`, type: "filepicker", value: `modules/enigma-box/img/${base}right.png` });
-            inputs.push({ name: `statue-${i}-2`, label: `Статуя ${i + 1}: 2 - Сзади (back)`, type: "filepicker", value: `modules/enigma-box/img/${base}back.png` });
-            inputs.push({ name: `statue-${i}-3`, label: `Статуя ${i + 1}: 3 - Слева (left)`, type: "filepicker", value: `modules/enigma-box/img/${base}left.png` });
-            inputs.push({ name: `statue-${i}-sol`, label: `Статуя ${i + 1}: Решение (0-top, 1-right, 2-back, 3-left)`, type: "number", value: 0, min: 0, max: 3 });
+            const num = i + 1;
+            inputs.push({ name: `statue-${i}-0`, label: enigmaLocalize("ENIGMA.StatueRotator.Side0", { num }), type: "filepicker", value: `modules/enigma-box/img/${base}top.png` });
+            inputs.push({ name: `statue-${i}-1`, label: enigmaLocalize("ENIGMA.StatueRotator.Side1", { num }), type: "filepicker", value: `modules/enigma-box/img/${base}right.png` });
+            inputs.push({ name: `statue-${i}-2`, label: enigmaLocalize("ENIGMA.StatueRotator.Side2", { num }), type: "filepicker", value: `modules/enigma-box/img/${base}back.png` });
+            inputs.push({ name: `statue-${i}-3`, label: enigmaLocalize("ENIGMA.StatueRotator.Side3", { num }), type: "filepicker", value: `modules/enigma-box/img/${base}left.png` });
+            inputs.push({ name: `statue-${i}-sol`, label: enigmaLocalize("ENIGMA.StatueRotator.Sol", { num }), type: "number", value: 0, min: 0, max: 3 });
         }
 
         return { inputs };

@@ -1,4 +1,6 @@
 import { BasePuzzleLock } from "./BasePuzzleLock.js";
+import { enigmaLocalize } from "../main.js";
+
 const MODULE_ID = "enigma-box";
 
 export class MusicPuzzle extends BasePuzzleLock {
@@ -14,13 +16,13 @@ export class MusicPuzzle extends BasePuzzleLock {
             "modules/enigma-box/sounds/woodsqueak_b.ogg"
         ];
         const inputs = [
-            { name: "btnCount", label: "Количество кнопок (2-6)", type: "number", value: 4, min: 2, max: 6 },
-            { name: "sequence", label: "Последовательность кнопок (через запятую, от 1)", type: "text", value: "1, 2, 3, 4" }
+            { name: "btnCount", label: enigmaLocalize("ENIGMA.MusicPuzzle.BtnCount"), type: "number", value: 4, min: 2, max: 6 },
+            { name: "sequence", label: enigmaLocalize("ENIGMA.MusicPuzzle.Sequence"), type: "text", value: "1, 2, 3, 4" }
         ];
         for (let i = 0; i < 6; i++) {
             inputs.push({
                 name: `note${i}`,
-                label: `Звук кнопки ${i + 1}`,
+                label: enigmaLocalize("ENIGMA.MusicPuzzle.NoteLabel", { num: i + 1 }),
                 type: "audiopicker",
                 value: defaultNotes[i]
             });
@@ -32,6 +34,7 @@ export class MusicPuzzle extends BasePuzzleLock {
         const data = await super.getData();
         const config = this.document.getFlag(MODULE_ID, "config") || {};
         data.description = config.description || "";
+        data.playMelodyLabel = enigmaLocalize("ENIGMA.MusicPuzzle.PlayMelody");
         const count = parseInt(config.btnCount, 10) || 4;
         data.buttons = Array.from({ length: count }, (_, i) => ({ id: i, label: i + 1 }));
         return data;

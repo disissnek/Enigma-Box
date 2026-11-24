@@ -1,4 +1,6 @@
 import { BasePuzzleLock } from "./BasePuzzleLock.js";
+import { enigmaLocalize } from "../main.js";
+
 const MODULE_ID = "enigma-box";
 
 export class ItemLock extends BasePuzzleLock {
@@ -6,10 +8,15 @@ export class ItemLock extends BasePuzzleLock {
 
     static get formConfiguration() {
         const inputs = [
-            { name: "slotCount", label: "Количество слотов (1-5)", type: "number", value: 3, min: 1, max: 5 }
+            { name: "slotCount", label: enigmaLocalize("ENIGMA.ItemLock.SlotCount"), type: "number", value: 3, min: 1, max: 5 }
         ];
         for (let i = 0; i < 5; i++) {
-            inputs.push({ name: `item${i}`, label: `Слот ${i + 1}: Название нужного предмета`, type: "text", value: "" });
+            inputs.push({
+                name: `item${i}`,
+                label: enigmaLocalize("ENIGMA.ItemLock.ItemLabel", { num: i + 1 }),
+                type: "text",
+                value: ""
+            });
         }
         return { inputs };
     }
@@ -18,6 +25,7 @@ export class ItemLock extends BasePuzzleLock {
         const data = await super.getData();
         const config = this.document.getFlag(MODULE_ID, "config") || {};
         data.description = config.description || "";
+        data.emptySlotTitle = enigmaLocalize("ENIGMA.ItemLock.SlotEmptyTitle");
         const count = parseInt(config.slotCount, 10) || 3;
 
         const state = this.getPuzzleState();
@@ -28,7 +36,11 @@ export class ItemLock extends BasePuzzleLock {
 
         data.slots = state.items.map((item, i) => ({
             id: i,
-            item: item ? { ...item, img: this.normalizeAssetPath(item.img) } : null
+            item: item ? {
+                ...item,
+                img: this.normalizeAssetPath(item.img),
+                title: enigmaLocalize("ENIGMA.ItemLock.SlotOccupiedTitle", { name: item.name })
+            } : null
         }));
         return data;
     }

@@ -1,4 +1,6 @@
 import { BasePuzzleLock } from "./BasePuzzleLock.js";
+import { enigmaLocalize } from "../main.js";
+
 const MODULE_ID = "enigma-box";
 
 export class LeverPuzzle extends BasePuzzleLock {
@@ -6,12 +8,19 @@ export class LeverPuzzle extends BasePuzzleLock {
 
     static get formConfiguration() {
         const inputs = [
-            { name: "leverCount", label: "Количество рычагов (2-6)", type: "number", value: 4, min: 2, max: 6 },
-            { name: "positions", label: "Положений на рычаг (2-5)", type: "number", value: 3, min: 2, max: 5 },
-            { name: "handleImg", label: "Картинка рукоятки", type: "filepicker", value: "modules/enigma-box/img/richag.svg" }
+            { name: "leverCount", label: enigmaLocalize("ENIGMA.LeverPuzzle.LeverCount"), type: "number", value: 4, min: 2, max: 6 },
+            { name: "positions", label: enigmaLocalize("ENIGMA.LeverPuzzle.Positions"), type: "number", value: 3, min: 2, max: 5 },
+            { name: "handleImg", label: enigmaLocalize("ENIGMA.LeverPuzzle.HandleImg"), type: "filepicker", value: "modules/enigma-box/img/richag.svg" }
         ];
         for (let i = 0; i < 6; i++) {
-            inputs.push({ name: `lever${i}_sol`, label: `Рычаг ${i + 1}: Решение (сверху вниз, от 0)`, type: "number", value: 0, min: 0, max: 4 });
+            inputs.push({
+                name: `lever${i}_sol`,
+                label: enigmaLocalize("ENIGMA.LeverPuzzle.Sol", { num: i + 1 }),
+                type: "number",
+                value: 0,
+                min: 0,
+                max: 4
+            });
         }
         return { inputs };
     }

@@ -1,4 +1,6 @@
 import { BasePuzzleLock } from "./BasePuzzleLock.js";
+import { enigmaLocalize } from "../main.js";
+
 const MODULE_ID = "enigma-box";
 
 export class TextPasswordPuzzle extends BasePuzzleLock {
@@ -7,10 +9,10 @@ export class TextPasswordPuzzle extends BasePuzzleLock {
     static get formConfiguration() {
         return {
             inputs: [
-                { name: "panelBg", label: "Фон панели (panel.jpg)", type: "filepicker", value: "modules/enigma-box/img/panel.jpg" },
-                { name: "secretPassword", label: "Правильный пароль (буквы или цифры)", type: "text", value: "ТАЙНА" },
-                { name: "caseSensitive", label: "Учитывать регистр букв? (0 - Нет, 1 - Да)", type: "number", value: 0, min: 0, max: 1 },
-                { name: "passPlaceholder", label: "Подсказка внутри поля", type: "text", value: "Введите пароль..." }
+                { name: "panelBg", label: enigmaLocalize("ENIGMA.TextPasswordPuzzle.PanelBg"), type: "filepicker", value: "modules/enigma-box/img/panel.jpg" },
+                { name: "secretPassword", label: enigmaLocalize("ENIGMA.TextPasswordPuzzle.SecretPassword"), type: "text", value: "ТАЙНА" },
+                { name: "caseSensitive", label: enigmaLocalize("ENIGMA.TextPasswordPuzzle.CaseSensitive"), type: "number", value: 0, min: 0, max: 1 },
+                { name: "passPlaceholder", label: enigmaLocalize("ENIGMA.TextPasswordPuzzle.PassPlaceholder"), type: "text", value: enigmaLocalize("ENIGMA.TextPasswordPuzzle.DefaultPlaceholder") }
             ]
         };
     }
@@ -20,7 +22,9 @@ export class TextPasswordPuzzle extends BasePuzzleLock {
         const config = this.document.getFlag(MODULE_ID, "config") || {};
         data.description = config.description || "";
         data.panelBg = this.normalizeAssetPath(config.panelBg || "") || "modules/enigma-box/img/panel.jpg";
-        data.passPlaceholder = config.passPlaceholder !== undefined ? config.passPlaceholder : "Введите пароль...";
+        data.passPlaceholder = config.passPlaceholder !== undefined ? config.passPlaceholder : enigmaLocalize("ENIGMA.TextPasswordPuzzle.DefaultPlaceholder");
+        data.clearTitle = enigmaLocalize("ENIGMA.TextPasswordPuzzle.ClearTitle");
+        data.submitTitle = enigmaLocalize("ENIGMA.TextPasswordPuzzle.SubmitTitle");
         return data;
     }
 

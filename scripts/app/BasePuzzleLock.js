@@ -1,3 +1,5 @@
+import { enigmaLocalize } from "../main.js";
+
 const MODULE_ID = "enigma-box";
 
 export class BasePuzzleLock extends Application {
@@ -22,7 +24,7 @@ export class BasePuzzleLock extends Application {
 
     get title() {
         const config = this.document.getFlag(MODULE_ID, "config") || {};
-        return config.customTitle || `Загадка: ${this.document.name || "Секретный замок"}`;
+        return config.customTitle || enigmaLocalize("ENIGMA.DefaultWindowTitle", { name: this.document.name || enigmaLocalize("ENIGMA.DefaultPuzzleHeader") });
     }
 
     get unlockSound() {
@@ -88,12 +90,12 @@ export class BasePuzzleLock extends Application {
 
     async getData() {
         const config = this.document.getFlag(MODULE_ID, "config") || {};
-        return { docName: config.customTitle || this.document.name || "Тайна" };
+        return { docName: config.customTitle || this.document.name || enigmaLocalize("ENIGMA.DefaultPuzzleHeader") };
     }
 
     async onUnlock() {
         this.playSound(this.unlockSound, 0.8);
-        ui.notifications.success("Загадка решена!");
+        ui.notifications.success(enigmaLocalize("ENIGMA.UnlockSuccess"));
 
         const config = foundry.utils.deepClone(this.document.getFlag(MODULE_ID, "config") || {});
         this.document.enigmaSolved = true;
@@ -138,7 +140,7 @@ export class BasePuzzleLock extends Application {
                 game.socket.emit(`module.${MODULE_ID}`, payload);
             } else {
                 this.queuePendingUnlock(payload);
-                ui.notifications.info("Мастер не в сети — дверь откроется автоматически, как только ГМ зайдёт в мир.");
+                ui.notifications.info(enigmaLocalize("ENIGMA.OfflineGMNotice"));
             }
         }
 

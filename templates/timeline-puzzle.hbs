@@ -1,19 +1,17 @@
 <div class="puzzle-inner-content">
     <h1>{{docName}}</h1>
     {{#if description}}<p class="enigma-desc">{{{description}}}</p>{{/if}}
-    
-    <!-- Сборная полка -->
-    <div class="enigma-bookshelf-wrapper" 
-         style="background-image: url('{{{bgBack}}}');">
+
+    <div class="enigma-bookshelf-wrapper" style="background-image: url('{{{bgBack}}}');">
         <div class="shelf-top" style="background-image: url('{{{bgTopBot}}}');"></div>
         <div class="shelf-bottom" style="background-image: url('{{{bgTopBot}}}');"></div>
         <div class="shelf-left" style="background-image: url('{{{bgSides}}}');"></div>
         <div class="shelf-right" style="background-image: url('{{{bgSides}}}');"></div>
-        
+
         <div class="enigma-timeline-board">
             {{#each books as |book|}}
                 <div class="timeline-book" data-pos="{{book.pos}}" style="background-image: url('{{{book.img}}}');">
-                    <div class="book-spine"><span>{{book.text}}</span></div>
+                    <div class="book-spine">{{book.text}}</div>
                 </div>
             {{/each}}
         </div>

@@ -34,18 +34,6 @@
     pointer-events: none; 
 }
 .enigma-wheel-container:hover .enigma-ring { filter: brightness(1.1); }
-.enigma-ring.outer { 
-    -webkit-mask-image: radial-gradient(circle, transparent 58%, black 59%); 
-    mask-image: radial-gradient(circle, transparent 58%, black 59%);
-}
-.enigma-ring.mid { 
-    -webkit-mask-image: radial-gradient(circle, transparent 28%, black 29%, black 59%, transparent 60%); 
-    mask-image: radial-gradient(circle, transparent 28%, black 29%, black 59%, transparent 60%);
-}
-.enigma-ring.inner { 
-    -webkit-mask-image: radial-gradient(circle, black 29%, transparent 30%); 
-    mask-image: radial-gradient(circle, black 29%, transparent 30%);
-}
 
 /* ==========================================
    3. ВРАЩЕНИЕ СТАТУЙ (Подмена сторон)

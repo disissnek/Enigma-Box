@@ -1,4 +1,6 @@
 import { BasePuzzleLock } from "./BasePuzzleLock.js";
+import { enigmaLocalize } from "../main.js";
+
 const MODULE_ID = "enigma-box";
 
 export class TimelinePuzzle extends BasePuzzleLock {
@@ -10,14 +12,15 @@ export class TimelinePuzzle extends BasePuzzleLock {
 
     static get formConfiguration() {
         const inputs = [
-            { name: "bookCount", label: "Кол-во книг (2-12)", type: "number", value: 6, min: 2, max: 12 },
-            { name: "bgBack", label: "Фон полки (задник)", type: "filepicker", value: "modules/enigma-box/img/bookback.jpg" },
-            { name: "bgTopBot", label: "Верх/Низ полки", type: "filepicker", value: "modules/enigma-box/img/booktopbot.jpg" },
-            { name: "bgSides", label: "Боковины полки", type: "filepicker", value: "modules/enigma-box/img/bookleftright.jpg" }
+            { name: "bookCount", label: enigmaLocalize("ENIGMA.TimelinePuzzle.BookCount"), type: "number", value: 6, min: 2, max: 12 },
+            { name: "bgBack", label: enigmaLocalize("ENIGMA.TimelinePuzzle.BgBack"), type: "filepicker", value: "modules/enigma-box/img/bookback.jpg" },
+            { name: "bgTopBot", label: enigmaLocalize("ENIGMA.TimelinePuzzle.BgTopBot"), type: "filepicker", value: "modules/enigma-box/img/booktopbot.jpg" },
+            { name: "bgSides", label: enigmaLocalize("ENIGMA.TimelinePuzzle.BgSides"), type: "filepicker", value: "modules/enigma-box/img/bookleftright.jpg" }
         ];
         for (let i = 0; i < 12; i++) {
-            inputs.push({ name: `bookTex${i}`, label: `Книга ${i + 1}: Обложка`, type: "filepicker", value: `modules/enigma-box/img/book${(i % 6) + 1}.png` });
-            inputs.push({ name: `book${i}`, label: `Книга ${i + 1}: Текст`, type: "text", value: `Книга ${i + 1}` });
+            const num = i + 1;
+            inputs.push({ name: `bookTex${i}`, label: enigmaLocalize("ENIGMA.TimelinePuzzle.BookTex", { num }), type: "filepicker", value: `modules/enigma-box/img/book${(i % 6) + 1}.png` });
+            inputs.push({ name: `book${i}`, label: enigmaLocalize("ENIGMA.TimelinePuzzle.BookText", { num }), type: "text", value: enigmaLocalize("ENIGMA.TimelinePuzzle.DefaultBook", { num }) });
         }
         return { inputs };
     }
@@ -41,7 +44,7 @@ export class TimelinePuzzle extends BasePuzzleLock {
         data.books = state.timeline.order.map((val, i) => ({
             pos: i,
             id: val,
-            text: config[`book${val}`] || `Книга ${val + 1}`,
+            text: config[`book${val}`] || enigmaLocalize("ENIGMA.TimelinePuzzle.DefaultBook", { num: val + 1 }),
             img: this.normalizeAssetPath(config[`bookTex${val}`] || "") || `modules/enigma-box/img/book${(val % 6) + 1}.png`
         }));
         return data;

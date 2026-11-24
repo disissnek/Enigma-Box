@@ -1,4 +1,6 @@
 import { BasePuzzleLock } from "./BasePuzzleLock.js";
+import { enigmaLocalize } from "../main.js";
+
 const MODULE_ID = "enigma-box";
 
 export class PasswordPuzzle extends BasePuzzleLock {
@@ -6,16 +8,16 @@ export class PasswordPuzzle extends BasePuzzleLock {
 
     static get formConfiguration() {
         const inputs = [
-            { name: "keypadBg", label: "Фон панели (с экраном и кнопкой стирания)", type: "filepicker", value: "modules/enigma-box/img/cifers_bg.jpg" },
-            { name: "keyBtnBg", label: "Картинка одной кнопки", type: "filepicker", value: "modules/enigma-box/img/cifer_btn.png" },
-            { name: "password", label: "Правильный пароль (цифры 0-9)", type: "text", value: "1234" }
+            { name: "keypadBg", label: enigmaLocalize("ENIGMA.PasswordPuzzle.KeypadBg"), type: "filepicker", value: "modules/enigma-box/img/cifers_bg.jpg" },
+            { name: "keyBtnBg", label: enigmaLocalize("ENIGMA.PasswordPuzzle.KeyBtnBg"), type: "filepicker", value: "modules/enigma-box/img/cifer_btn.png" },
+            { name: "password", label: enigmaLocalize("ENIGMA.PasswordPuzzle.Password"), type: "text", value: "1234" }
         ];
 
         for (let i = 1; i <= 10; i++) {
             const digitLabel = i === 10 ? "0" : `${i}`;
             inputs.push({
                 name: `keyImg${i}`,
-                label: `Кнопка ${i} (цифра ${digitLabel}) — иконка вместо цифры (необязательно)`,
+                label: enigmaLocalize("ENIGMA.PasswordPuzzle.KeyImg", { num: i, digit: digitLabel }),
                 type: "filepicker",
                 value: ""
             });
@@ -27,7 +29,8 @@ export class PasswordPuzzle extends BasePuzzleLock {
     async getData() {
         const data = await super.getData();
         const config = this.document.getFlag(MODULE_ID, "config") || {};
-        data.description = config.description || "Введите код доступа...";
+        data.description = config.description || enigmaLocalize("ENIGMA.PasswordPuzzle.DefaultDescription");
+        data.clearTitle = enigmaLocalize("ENIGMA.PasswordPuzzle.ClearTitle");
         data.keypadBg = this.normalizeAssetPath(config.keypadBg || "") || "modules/enigma-box/img/cifers_bg.jpg";
         data.keyBtnBg = this.normalizeAssetPath(config.keyBtnBg || "") || "modules/enigma-box/img/cifer_btn.png";
 
